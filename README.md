@@ -1,2 +1,2 @@
-# ComfyUI-Hangover_Utils
+# ComfyUI_Hangover-Utils
 Various utiliti nodes for ComfyUI
