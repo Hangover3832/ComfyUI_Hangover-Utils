@@ -1,0 +1,1400 @@
+{
+  "id": "15424205-e971-42a2-868e-942a020ba682",
+  "revision": 0,
+  "last_node_id": 92,
+  "last_link_id": 200,
+  "nodes": [
+    {
+      "id": 36,
+      "type": "ttN debugInput",
+      "pos": [
+        865.152099609375,
+        -322.0664978027344
+      ],
+      "size": [
+        284.090087890625,
+        160
+      ],
+      "flags": {},
+      "order": 18,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "debug",
+          "shape": 7,
+          "type": "*",
+          "link": 156
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfyui_tinyterranodes",
+        "ver": "2.0.7",
+        "Node name for S&R": "ttN debugInput",
+        "ttNnodeVersion": null
+      },
+      "widgets_values": [
+        false,
+        "ttN debug:",
+        "Green",
+        "-sqrt(pi)*erf(a)/2 + sqrt(pi)*erf(b)/2"
+      ]
+    },
+    {
+      "id": 9,
+      "type": "ttN debugInput",
+      "pos": [
+        869.3556518554688,
+        -110.87124633789062
+      ],
+      "size": [
+        268.6900939941406,
+        160
+      ],
+      "flags": {},
+      "order": 24,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "debug",
+          "shape": 7,
+          "type": "*",
+          "link": 186
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfyui_tinyterranodes",
+        "ver": "2.0.7",
+        "Node name for S&R": "ttN debugInput",
+        "ttNnodeVersion": null
+      },
+      "widgets_values": [
+        false,
+        "ttN debug:",
+        "Green",
+        "1.772453850905516"
+      ]
+    },
+    {
+      "id": 52,
+      "type": "ttN debugInput",
+      "pos": [
+        872.8253784179688,
+        442.7530517578125
+      ],
+      "size": [
+        268.6900939941406,
+        160
+      ],
+      "flags": {},
+      "order": 25,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "debug",
+          "shape": 7,
+          "type": "*",
+          "link": 170
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfyui_tinyterranodes",
+        "ver": "2.0.7",
+        "Node name for S&R": "ttN debugInput",
+        "ttNnodeVersion": null
+      },
+      "widgets_values": [
+        false,
+        "ttN debug:",
+        "Green",
+        "5.8"
+      ]
+    },
+    {
+      "id": 51,
+      "type": "ttN debugInput",
+      "pos": [
+        869.4706420898438,
+        199.08070373535156
+      ],
+      "size": [
+        268.6900939941406,
+        160
+      ],
+      "flags": {},
+      "order": 22,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "debug",
+          "shape": 7,
+          "type": "*",
+          "link": 168
+        }
+      ],
+      "outputs": [],
+      "properties": {
+        "cnr_id": "comfyui_tinyterranodes",
+        "ver": "2.0.7",
+        "Node name for S&R": "ttN debugInput",
+        "ttNnodeVersion": null
+      },
+      "widgets_values": [
+        false,
+        "ttN debug:",
+        "Green",
+        "1.6*f + 1.8"
+      ]
+    },
+    {
+      "id": 80,
+      "type": "Sympy Math Interpreter",
+      "pos": [
+        543.2853393554688,
+        435.1097412109375
+      ],
+      "size": [
+        270,
+        158
+      ],
+      "flags": {},
+      "order": 23,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "a",
+          "shape": 7,
+          "type": "*",
+          "link": null
+        },
+        {
+          "name": "b",
+          "shape": 7,
+          "type": "*",
+          "link": null
+        },
+        {
+          "name": "c",
+          "shape": 7,
+          "type": "*",
+          "link": null
+        },
+        {
+          "name": "d",
+          "shape": 7,
+          "type": "*",
+          "link": null
+        },
+        {
+          "name": "e",
+          "shape": 7,
+          "type": "*",
+          "link": null
+        },
+        {
+          "name": "f",
+          "shape": 7,
+          "type": "*",
+          "link": 169
+        },
+        {
+          "name": "expression_A",
+          "type": "STRING",
+          "widget": {
+            "name": "expression_A"
+          },
+          "link": 171
+        }
+      ],
+      "outputs": [
+        {
+          "name": "int_A",
+          "type": "INT",
+          "links": null
+        },
+        {
+          "name": "float_A",
+          "type": "FLOAT",
+          "links": [
+            170
+          ]
+        },
+        {
+          "name": "str_A",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "aux_id": "Hangover3832/ComfyUI_Hangover-Utils",
+        "ver": "e5f2889cdebd622da3c9b143a785987e37972493",
+        "Node name for S&R": "Sympy Math Interpreter"
+      },
+      "widgets_values": [
+        "0"
+      ]
+    },
+    {
+      "id": 54,
+      "type": "PrimitiveInt",
+      "pos": [
+        215.0380859375,
+        750.3875732421875
+      ],
+      "size": [
+        270,
+        82
+      ],
+      "flags": {},
+      "order": 0,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "INT",
+          "type": "INT",
+          "links": [
+            157,
+            161
+          ]
+        }
+      ],
+      "title": "TotalPixels",
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.49",
+        "Node name for S&R": "PrimitiveInt"
+      },
+      "widgets_values": [
+        1048576,
+        "fixed"
+      ]
+    },
+    {
+      "id": 55,
+      "type": "PrimitiveInt",
+      "pos": [
+        215.65802001953125,
+        878.8587646484375
+      ],
+      "size": [
+        270,
+        82
+      ],
+      "flags": {},
+      "order": 1,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "INT",
+          "type": "INT",
+          "links": [
+            174,
+            179
+          ]
+        }
+      ],
+      "title": "Width Ratio",
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.49",
+        "Node name for S&R": "PrimitiveInt"
+      },
+      "widgets_values": [
+        16,
+        "fixed"
+      ]
+    },
+    {
+      "id": 56,
+      "type": "PrimitiveInt",
+      "pos": [
+        216.93878173828125,
+        1007.9909057617188
+      ],
+      "size": [
+        270,
+        82
+      ],
+      "flags": {},
+      "order": 2,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "INT",
+          "type": "INT",
+          "links": [
+            159,
+            180
+          ]
+        }
+      ],
+      "title": "Height Ratio",
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.49",
+        "Node name for S&R": "PrimitiveInt"
+      },
+      "widgets_values": [
+        9,
+        "fixed"
+      ]
+    },
+    {
+      "id": 77,
+      "type": "Sympy Math Interpreter",
+      "pos": [
+        555.5044555664062,
+        774.9312133789062
+      ],
+      "size": [
+        270,
+        158
+      ],
+      "flags": {},
+      "order": 15,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "a",
+          "shape": 7,
+          "type": "*",
+          "link": 157
+        },
+        {
+          "name": "b",
+          "shape": 7,
+          "type": "*",
+          "link": 174
+        },
+        {
+          "name": "c",
+          "shape": 7,
+          "type": "*",
+          "link": 159
+        },
+        {
+          "name": "d",
+          "shape": 7,
+          "type": "*",
+          "link": 181
+        },
+        {
+          "name": "e",
+          "shape": 7,
+          "type": "*",
+          "link": null
+        },
+        {
+          "name": "f",
+          "shape": 7,
+          "type": "*",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "int_A",
+          "type": "INT",
+          "links": [
+            160
+          ]
+        },
+        {
+          "name": "float_A",
+          "type": "FLOAT",
+          "links": null
+        },
+        {
+          "name": "str_A",
+          "type": "STRING",
+          "links": []
+        }
+      ],
+      "properties": {
+        "aux_id": "Hangover3832/ComfyUI_Hangover-Utils",
+        "ver": "e5f2889cdebd622da3c9b143a785987e37972493",
+        "Node name for S&R": "Sympy Math Interpreter"
+      },
+      "widgets_values": [
+        "d*round(sqrt(a)/c*b/d)"
+      ]
+    },
+    {
+      "id": 78,
+      "type": "Sympy Math Interpreter",
+      "pos": [
+        554.3060302734375,
+        1004.9725341796875
+      ],
+      "size": [
+        270,
+        158
+      ],
+      "flags": {},
+      "order": 16,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "a",
+          "shape": 7,
+          "type": "*",
+          "link": 161
+        },
+        {
+          "name": "b",
+          "shape": 7,
+          "type": "*",
+          "link": 179
+        },
+        {
+          "name": "c",
+          "shape": 7,
+          "type": "*",
+          "link": 180
+        },
+        {
+          "name": "d",
+          "shape": 7,
+          "type": "*",
+          "link": 182
+        },
+        {
+          "name": "e",
+          "shape": 7,
+          "type": "*",
+          "link": null
+        },
+        {
+          "name": "f",
+          "shape": 7,
+          "type": "*",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "int_A",
+          "type": "INT",
+          "links": [
+            164
+          ]
+        },
+        {
+          "name": "float_A",
+          "type": "FLOAT",
+          "links": null
+        },
+        {
+          "name": "str_A",
+          "type": "STRING",
+          "links": null
+        }
+      ],
+      "properties": {
+        "aux_id": "Hangover3832/ComfyUI_Hangover-Utils",
+        "ver": "e5f2889cdebd622da3c9b143a785987e37972493",
+        "Node name for S&R": "Sympy Math Interpreter"
+      },
+      "widgets_values": [
+        "d*round(sqrt(a)/b*c/d)"
+      ]
+    },
+    {
+      "id": 63,
+      "type": "ttN debugInput",
+      "pos": [
+        905.2613525390625,
+        1002.0794677734375
+      ],
+      "size": [
+        270,
+        160
+      ],
+      "flags": {},
+      "order": 21,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "debug",
+          "shape": 7,
+          "type": "*",
+          "link": 164
+        }
+      ],
+      "outputs": [],
+      "title": "Height",
+      "properties": {
+        "cnr_id": "comfyui_tinyterranodes",
+        "ver": "2.0.7",
+        "Node name for S&R": "ttN debugInput",
+        "ttNnodeVersion": null
+      },
+      "widgets_values": [
+        false,
+        "ttN debug:",
+        "Red",
+        "576"
+      ]
+    },
+    {
+      "id": 62,
+      "type": "ttN debugInput",
+      "pos": [
+        902.2444458007812,
+        757.409912109375
+      ],
+      "size": [
+        270,
+        160
+      ],
+      "flags": {},
+      "order": 20,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "debug",
+          "shape": 7,
+          "type": "*",
+          "link": 160
+        }
+      ],
+      "outputs": [],
+      "title": "Width",
+      "properties": {
+        "cnr_id": "comfyui_tinyterranodes",
+        "ver": "2.0.7",
+        "Node name for S&R": "ttN debugInput",
+        "ttNnodeVersion": null
+      },
+      "widgets_values": [
+        false,
+        "ttN debug:",
+        "Red",
+        "1824"
+      ]
+    },
+    {
+      "id": 81,
+      "type": "PrimitiveInt",
+      "pos": [
+        221.11233520507812,
+        1134.478271484375
+      ],
+      "size": [
+        270,
+        82
+      ],
+      "flags": {},
+      "order": 3,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "INT",
+          "type": "INT",
+          "links": [
+            181,
+            182
+          ]
+        }
+      ],
+      "title": "divisibility",
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.49",
+        "Node name for S&R": "PrimitiveInt"
+      },
+      "widgets_values": [
+        8,
+        "fixed"
+      ]
+    },
+    {
+      "id": 82,
+      "type": "Note",
+      "pos": [
+        1202.0986328125,
+        758.767333984375
+      ],
+      "size": [
+        329.1000061035156,
+        408.1000061035156
+      ],
+      "flags": {},
+      "order": 4,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "Calculate Image dimensions width and height for a given amount of total pixels (a) and an aspect ratio of (b)/(c), where as the width and height pixel count is divisible by (d).\n"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 86,
+      "type": "Note",
+      "pos": [
+        1195.4454345703125,
+        -179.79461669921875
+      ],
+      "size": [
+        336.33013916015625,
+        243.48345947265625
+      ],
+      "flags": {},
+      "order": 5,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "Symbolic integration of e^(-x^2) in stage 1 and evaluation from (a) to (b) in stage 2.\n\nA concise list of functions:\n + - * / **\n pi\n E\n round\n floor\n min\n max\n sin\n cos\n tan\n exp\n !\nand probably many more"
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 39,
+      "type": "PrimitiveFloat",
+      "pos": [
+        225.55282592773438,
+        -134.88392639160156
+      ],
+      "size": [
+        270,
+        58
+      ],
+      "flags": {},
+      "order": 6,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "FLOAT",
+          "type": "FLOAT",
+          "links": [
+            183
+          ]
+        }
+      ],
+      "title": "a",
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.49",
+        "Node name for S&R": "PrimitiveFloat"
+      },
+      "widgets_values": [
+        -20
+      ]
+    },
+    {
+      "id": 40,
+      "type": "PrimitiveFloat",
+      "pos": [
+        222.67356872558594,
+        -24.451778411865234
+      ],
+      "size": [
+        270,
+        58
+      ],
+      "flags": {},
+      "order": 7,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "FLOAT",
+          "type": "FLOAT",
+          "links": [
+            184
+          ]
+        }
+      ],
+      "title": "b",
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.49",
+        "Node name for S&R": "PrimitiveFloat"
+      },
+      "widgets_values": [
+        20
+      ]
+    },
+    {
+      "id": 47,
+      "type": "PrimitiveFloat",
+      "pos": [
+        216.0391082763672,
+        196.19215393066406
+      ],
+      "size": [
+        270,
+        58
+      ],
+      "flags": {},
+      "order": 8,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "FLOAT",
+          "type": "FLOAT",
+          "links": [
+            165
+          ]
+        }
+      ],
+      "title": "a",
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.49",
+        "Node name for S&R": "PrimitiveFloat"
+      },
+      "widgets_values": [
+        0.8
+      ]
+    },
+    {
+      "id": 48,
+      "type": "PrimitiveFloat",
+      "pos": [
+        213.77908325195312,
+        299.2025451660156
+      ],
+      "size": [
+        270,
+        58
+      ],
+      "flags": {},
+      "order": 9,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "FLOAT",
+          "type": "FLOAT",
+          "links": [
+            166
+          ]
+        }
+      ],
+      "title": "b",
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.49",
+        "Node name for S&R": "PrimitiveFloat"
+      },
+      "widgets_values": [
+        1.8
+      ]
+    },
+    {
+      "id": 49,
+      "type": "PrimitiveFloat",
+      "pos": [
+        219.26304626464844,
+        412.4976806640625
+      ],
+      "size": [
+        270,
+        58
+      ],
+      "flags": {},
+      "order": 10,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "FLOAT",
+          "type": "FLOAT",
+          "links": [
+            167
+          ]
+        }
+      ],
+      "title": "c",
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.49",
+        "Node name for S&R": "PrimitiveFloat"
+      },
+      "widgets_values": [
+        8.9
+      ]
+    },
+    {
+      "id": 83,
+      "type": "Note",
+      "pos": [
+        1175.8099365234375,
+        203.28053283691406
+      ],
+      "size": [
+        327.1000061035156,
+        380.1000061035156
+      ],
+      "flags": {},
+      "order": 11,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "Symbolic 1st derivation of the polynomial a*x^2+b*x+c in stage 1 and evaluate at point x=(f) in the second stage."
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 50,
+      "type": "PrimitiveFloat",
+      "pos": [
+        212.2548065185547,
+        521.0167236328125
+      ],
+      "size": [
+        270,
+        58
+      ],
+      "flags": {},
+      "order": 12,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [
+        {
+          "name": "FLOAT",
+          "type": "FLOAT",
+          "links": [
+            169
+          ]
+        }
+      ],
+      "title": "f",
+      "properties": {
+        "cnr_id": "comfy-core",
+        "ver": "0.3.49",
+        "Node name for S&R": "PrimitiveFloat"
+      },
+      "widgets_values": [
+        2.5
+      ]
+    },
+    {
+      "id": 84,
+      "type": "Note",
+      "pos": [
+        1195.4044189453125,
+        -317.8525085449219
+      ],
+      "size": [
+        318.9747619628906,
+        88
+      ],
+      "flags": {},
+      "order": 13,
+      "mode": 0,
+      "inputs": [],
+      "outputs": [],
+      "properties": {},
+      "widgets_values": [
+        "Symbolic integration of e^(-x^2)*dx in stage 1 and evaluation from (a) to (b) in stage 2."
+      ],
+      "color": "#432",
+      "bgcolor": "#653"
+    },
+    {
+      "id": 79,
+      "type": "Sympy Math Interpreter",
+      "pos": [
+        544.4078369140625,
+        207.56301879882812
+      ],
+      "size": [
+        270,
+        158
+      ],
+      "flags": {},
+      "order": 17,
+      "mode": 0,
+      "inputs": [
+        {
+          "label": "a",
+          "name": "a",
+          "shape": 7,
+          "type": "*",
+          "link": 165
+        },
+        {
+          "name": "b",
+          "shape": 7,
+          "type": "*",
+          "link": 166
+        },
+        {
+          "name": "c",
+          "shape": 7,
+          "type": "*",
+          "link": 167
+        },
+        {
+          "name": "d",
+          "shape": 7,
+          "type": "*",
+          "link": null
+        },
+        {
+          "name": "e",
+          "shape": 7,
+          "type": "*",
+          "link": null
+        },
+        {
+          "name": "f",
+          "shape": 7,
+          "type": "*",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "int_A",
+          "type": "INT",
+          "links": null
+        },
+        {
+          "name": "float_A",
+          "type": "FLOAT",
+          "links": []
+        },
+        {
+          "name": "str_A",
+          "type": "STRING",
+          "links": [
+            168,
+            171
+          ]
+        }
+      ],
+      "properties": {
+        "aux_id": "Hangover3832/ComfyUI_Hangover-Utils",
+        "ver": "e5f2889cdebd622da3c9b143a785987e37972493",
+        "Node name for S&R": "Sympy Math Interpreter"
+      },
+      "widgets_values": [
+        "diff(a*x**2+b*x+c, x).subs({x:f})"
+      ]
+    },
+    {
+      "id": 85,
+      "type": "Sympy Math Interpreter",
+      "pos": [
+        544.205810546875,
+        -107.00292205810547
+      ],
+      "size": [
+        270,
+        158
+      ],
+      "flags": {},
+      "order": 19,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "a",
+          "shape": 7,
+          "type": "*",
+          "link": 183
+        },
+        {
+          "name": "b",
+          "shape": 7,
+          "type": "*",
+          "link": 184
+        },
+        {
+          "name": "c",
+          "shape": 7,
+          "type": "*",
+          "link": null
+        },
+        {
+          "name": "d",
+          "shape": 7,
+          "type": "*",
+          "link": null
+        },
+        {
+          "name": "e",
+          "shape": 7,
+          "type": "*",
+          "link": null
+        },
+        {
+          "name": "f",
+          "shape": 7,
+          "type": "*",
+          "link": null
+        },
+        {
+          "name": "expression_A",
+          "type": "STRING",
+          "widget": {
+            "name": "expression_A"
+          },
+          "link": 185
+        }
+      ],
+      "outputs": [
+        {
+          "name": "int_A",
+          "type": "INT",
+          "links": null
+        },
+        {
+          "name": "float_A",
+          "type": "FLOAT",
+          "links": [
+            186
+          ]
+        },
+        {
+          "name": "str_A",
+          "type": "STRING",
+          "links": []
+        }
+      ],
+      "properties": {
+        "aux_id": "Hangover3832/ComfyUI_Hangover-Utils",
+        "ver": "e5f2889cdebd622da3c9b143a785987e37972493",
+        "Node name for S&R": "Sympy Math Interpreter"
+      },
+      "widgets_values": [
+        "integrate(exp(-x**2),(x,a,b))"
+      ]
+    },
+    {
+      "id": 76,
+      "type": "Sympy Math Interpreter",
+      "pos": [
+        543.60595703125,
+        -313.30291748046875
+      ],
+      "size": [
+        270,
+        158
+      ],
+      "flags": {},
+      "order": 14,
+      "mode": 0,
+      "inputs": [
+        {
+          "name": "a",
+          "shape": 7,
+          "type": "*",
+          "link": null
+        },
+        {
+          "name": "b",
+          "shape": 7,
+          "type": "*",
+          "link": null
+        },
+        {
+          "name": "c",
+          "shape": 7,
+          "type": "*",
+          "link": null
+        },
+        {
+          "name": "d",
+          "shape": 7,
+          "type": "*",
+          "link": null
+        },
+        {
+          "name": "e",
+          "shape": 7,
+          "type": "*",
+          "link": null
+        },
+        {
+          "name": "f",
+          "shape": 7,
+          "type": "*",
+          "link": null
+        }
+      ],
+      "outputs": [
+        {
+          "name": "int_A",
+          "type": "INT",
+          "links": null
+        },
+        {
+          "name": "float_A",
+          "type": "FLOAT",
+          "links": []
+        },
+        {
+          "name": "str_A",
+          "type": "STRING",
+          "links": [
+            156,
+            185
+          ]
+        }
+      ],
+      "properties": {
+        "aux_id": "Hangover3832/ComfyUI_Hangover-Utils",
+        "ver": "e5f2889cdebd622da3c9b143a785987e37972493",
+        "Node name for S&R": "Sympy Math Interpreter"
+      },
+      "widgets_values": [
+        "integrate(exp(-x**2),(x,a,b))"
+      ]
+    }
+  ],
+  "links": [
+    [
+      156,
+      76,
+      2,
+      36,
+      0,
+      "*"
+    ],
+    [
+      157,
+      54,
+      0,
+      77,
+      0,
+      "*"
+    ],
+    [
+      159,
+      56,
+      0,
+      77,
+      2,
+      "*"
+    ],
+    [
+      160,
+      77,
+      0,
+      62,
+      0,
+      "*"
+    ],
+    [
+      161,
+      54,
+      0,
+      78,
+      0,
+      "*"
+    ],
+    [
+      164,
+      78,
+      0,
+      63,
+      0,
+      "*"
+    ],
+    [
+      165,
+      47,
+      0,
+      79,
+      0,
+      "*"
+    ],
+    [
+      166,
+      48,
+      0,
+      79,
+      1,
+      "*"
+    ],
+    [
+      167,
+      49,
+      0,
+      79,
+      2,
+      "*"
+    ],
+    [
+      168,
+      79,
+      2,
+      51,
+      0,
+      "*"
+    ],
+    [
+      169,
+      50,
+      0,
+      80,
+      5,
+      "*"
+    ],
+    [
+      170,
+      80,
+      1,
+      52,
+      0,
+      "*"
+    ],
+    [
+      171,
+      79,
+      2,
+      80,
+      6,
+      "STRING"
+    ],
+    [
+      174,
+      55,
+      0,
+      77,
+      1,
+      "*"
+    ],
+    [
+      179,
+      55,
+      0,
+      78,
+      1,
+      "*"
+    ],
+    [
+      180,
+      56,
+      0,
+      78,
+      2,
+      "*"
+    ],
+    [
+      181,
+      81,
+      0,
+      77,
+      3,
+      "*"
+    ],
+    [
+      182,
+      81,
+      0,
+      78,
+      3,
+      "*"
+    ],
+    [
+      183,
+      39,
+      0,
+      85,
+      0,
+      "*"
+    ],
+    [
+      184,
+      40,
+      0,
+      85,
+      1,
+      "*"
+    ],
+    [
+      185,
+      76,
+      2,
+      85,
+      6,
+      "STRING"
+    ],
+    [
+      186,
+      85,
+      1,
+      9,
+      0,
+      "*"
+    ]
+  ],
+  "groups": [
+    {
+      "id": 1,
+      "title": "Numerical Integration",
+      "bounding": [
+        200.01718139648438,
+        -395.4734191894531,
+        1384.54541015625,
+        475.45452880859375
+      ],
+      "color": "#3f789e",
+      "font_size": 24,
+      "flags": {}
+    },
+    {
+      "id": 2,
+      "title": "Numerical Diferentiation",
+      "bounding": [
+        198.45510864257812,
+        117.49468231201172,
+        1383.0762939453125,
+        511.3332214355469
+      ],
+      "color": "#3f789e",
+      "font_size": 24,
+      "flags": {}
+    },
+    {
+      "id": 3,
+      "title": "Image Dimension Calculator",
+      "bounding": [
+        188.1546630859375,
+        669.638916015625,
+        1386.3323974609375,
+        567.123779296875
+      ],
+      "color": "#3f789e",
+      "font_size": 24,
+      "flags": {}
+    }
+  ],
+  "config": {},
+  "extra": {
+    "ds": {
+      "scale": 0.6209213230591555,
+      "offset": [
+        471.3237347325726,
+        317.95866172940725
+      ]
+    },
+    "frontendVersion": "1.23.4",
+    "VHS_latentpreview": false,
+    "VHS_latentpreviewrate": 0,
+    "VHS_MetadataImage": true,
+    "VHS_KeepIntermediate": true
+  },
+  "version": 0.4
+}

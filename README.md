@@ -38,7 +38,7 @@ Based on [SymPy](https://www.sympy.org/en/index.html), this node brings powerful
 * <code>integrate(exp(-x**2),(x,a,b))</code> (numerical integrate from a to b)
 
 
-See [Examples](examples/examples.md)
+See [Examples](examples/examples.md) [example workflow](examples/d__sympy.json)
 
 ---
 
