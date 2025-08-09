@@ -7,11 +7,7 @@
 from sympy import *
 from sympy.parsing.sympy_parser import parse_expr
 from comfy.comfy_types import IO
-
-Math_Interpreter_Config = {
-    "num_vars": 6,
-}
-
+import math
 
 class Sympy_Interpreter:
     RETURN_TYPES = (
@@ -25,44 +21,60 @@ class Sympy_Interpreter:
         "str_A",
     )
 
+    Config = {
+        "num_vars": 6,
+    }
+
     FUNCTION = "calc"
     CATEGORY = "Hangover"
 
-    Input_Vars = [chr(c + ord("a")) for c in range(Math_Interpreter_Config["num_vars"])]
-    Variables = {key: (IO.ANY,) for key in Input_Vars}
+    Input_Vars = [chr(c + ord("a")) for c in range(Config["num_vars"])]
+    Variables = {"expression": (IO.STRING, {"multiline": False, "default": "0"},)}
+    Variables.update({key: (IO.ANY,) for key in Input_Vars})
 
     @classmethod
     def INPUT_TYPES(s):
         return {
             "required": {
-                "expression_A": (IO.STRING, {"multiline": False, "default": "0"}),
+                "expression": (IO.STRING, {"multiline": False, "default": "0"},),
             },
-            "optional":
-                s.Variables,
+            "optional" : s.Variables,
         }
 
-    def calc(self, expression_A:str, **kwargs):
-        print(f"Math_Interpreter: evaluating expression A({expression_A})")
-        expr_A = parse_expr(expression_A, local_dict=kwargs)
+    def calc(self, expression:str, **kwargs):
+        print(f"Math_Interpreter: evaluating expression A({expression})")
+        expr_A = parse_expr(expression, local_dict=kwargs)
         try:
             result_A = float(expr_A)
         except TypeError:
             result_A = 0.0
 
         return (
-            floor(result_A),
+            math.floor(result_A),
             result_A,
             str(expr_A),
         )
 
-
-def test_Sympy_Interpreter():
-    math = Sympy_Interpreter()
-    input_types = math.INPUT_TYPES()
-    res_int, res_flt, res_str = math.calc("a**2", a=5)
-    print(f"{input_types=}")
-    print(f"{res_int=}, {res_flt=}, {res_str=}")
+    def selfTest(self):
+        from random import random
+        try:
+            print(f"{self.INPUT_TYPES()=}")
+            print(f"{self.RETURN_TYPES=}, {self.RETURN_NAMES=}")
+            print(f"{self.Input_Vars=}")
+            variables = {key: random() for key in self.Input_Vars}
+            print(f"{variables=}")
+            expression = f"{self.Input_Vars[0]}"
+            for v in self.Input_Vars[1:-1]:
+                expression += f"+{v}"
+            res_int, res_flt, res_str = self.calc(expression, **variables)
+            print(f"{res_int=}, {res_flt=}, {res_str=}")
+            print(f"{type(res_int)=}, {type(res_flt)=}, {type(res_str)=}")
+            print("Tests sucess")
+        except:
+            print("Tests failed")
+            raise
 
 
 if __name__ == "__main__":
-    test_Sympy_Interpreter()
+    sympy = Sympy_Interpreter()
+    sympy.selfTest()
