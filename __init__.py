@@ -2,6 +2,7 @@ from .save_image_extra_metadata import SaveImage_NoWorkflow
 from .image_scale_bounding_box import ImageScaleBoundingBox
 from .inpaint_model import MakeInpaintModel
 from .math_interpreter import Sympy_Interpreter
+from .clipboard_paste import PasteImage
 
 
 # A dictionary that contains all nodes you want to export with their names
@@ -11,4 +12,5 @@ NODE_CLASS_MAPPINGS = {
     "Image Scale Bounding Box" : ImageScaleBoundingBox,
     "Make Inpaint Model": MakeInpaintModel,
     "Sympy Math Interpreter": Sympy_Interpreter,
+    "Image Clipboard Paster": PasteImage,
 }
