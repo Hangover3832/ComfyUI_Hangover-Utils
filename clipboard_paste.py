@@ -10,6 +10,7 @@ import numpy as np
 from PIL import ImageGrab, Image, UnidentifiedImageError
 from PIL.PngImagePlugin import PngImageFile
 from hashlib import sha256
+import pillow_avif
 
 
 def GetPILImageFromClipboard() -> list[Image.Image] | None:
