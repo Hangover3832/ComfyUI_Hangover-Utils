@@ -10,6 +10,7 @@
 
 * Removed: Microsoft Kosmos2 interrogator.
 * New node: Sympy Math Interpreter 🆕
+* New node: Image Clipboard Paster 🆕
 
 
 ## Nodes overview:
@@ -18,6 +19,8 @@
 - Stable Diffusion Privacy: Save Image with or without Metadata
 - Scale an Image To A Bounding Box
 - Easily make an inpainting version of any SD1.5 model
+- Image clipboard paster: Paste image(s) from your clipboard into ComfyUI
+
 
 ---
 
