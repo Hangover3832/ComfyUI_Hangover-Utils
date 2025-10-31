@@ -5,29 +5,24 @@
 @description: Automatic paste the image from the clipboard
 """
 
-# from nodes import MAX_RESOLUTION
-# import comfy.utils
-# import torch.nn.functional as F
-import torch
+from torch import Tensor, from_numpy
 import numpy as np
-from PIL import ImageGrab
-from PIL import Image
+from PIL import ImageGrab, Image, UnidentifiedImageError
 from PIL.PngImagePlugin import PngImageFile
-from PIL import UnidentifiedImageError
-import hashlib
-import json
+from hashlib import sha256
 
-def GetPILImageFromClipboard():
-    clip: PngImageFile = ImageGrab.grabclipboard()
-    if isinstance(clip, list):
-        result = Image.open(clip[-1]).convert("RGB")
+
+def GetPILImageFromClipboard() -> list[Image.Image] | None:
+    """Get the image from clipboard and convert it to PIL Image."""
+    clip = ImageGrab.grabclipboard()
+    if clip is None:
+        return None
+    elif isinstance(clip, list):
+        return [Image.open(fp=clip[i]) for i in range(len(clip))]
+    elif isinstance(clip, Image.Image):
+        return [Image.frombytes(mode=clip.mode, size=clip.size, data=clip.tobytes()).convert(mode="RGB")]
     else:
-        try:
-            result = Image.frombytes(clip.mode, clip.size, clip.tobytes()).convert("RGB")
-        except (AttributeError, UnidentifiedImageError):
-            result = None
-
-    return result
+        return None
 
 
 class PasteImage():
@@ -36,7 +31,7 @@ class PasteImage():
     CATEGORY = "Hangover"
 
     @classmethod
-    def INPUT_TYPES(s):
+    def INPUT_TYPES(cls):
         return {"optional": {
                    "alt_image": ("IMAGE",),
                    },
@@ -44,26 +39,31 @@ class PasteImage():
 
 
     @classmethod
-    def IS_CHANGED(s, alt_image=None):
-        sha = hashlib.sha256()
+    def IS_CHANGED(cls, alt_image: Tensor | None = None):
+        sha = sha256()
         img = GetPILImageFromClipboard()
         if img is None:
             if alt_image is not None:
                 sha.update(alt_image.numpy().tobytes())
         else:
-            sha.update(img.tobytes())
-        
+            for i in img:
+                sha.update(i.tobytes())
+
         return sha.digest().hex()
 
-    def paste(self, alt_image=None) -> tuple[torch.tensor]:
-        result: torch.tensor = None
+
+    def paste(self, alt_image: Tensor | None = None) -> tuple[Tensor | None]:
+        result = None
         image = GetPILImageFromClipboard()
         if image is not None:
-            result = np.array(image).astype(np.float32) / 255.0
-            result = torch.from_numpy(result).unsqueeze(0)
-            print(f"Clipboard has an image with {result.shape=}")
-        else:
+            result = np.array(object=image).astype(dtype=np.float32) / 255.0
+            result = from_numpy(result)
+            print(f"Clipboard contains {result.shape[0]} image{'s' if result.shape[0]>1 else ''}: {result.shape=}")
+        elif alt_image is not None:
             result = alt_image
+
+        if result is None:
+            raise UnidentifiedImageError("Error: No valid image found in the clipboard.")
 
         return result,
 
@@ -72,13 +72,18 @@ def run_test():
     print(f"{PasteImage.IS_CHANGED()=}")
     clp: PasteImage = PasteImage()
     print(f"{clp.INPUT_TYPES()=}")
-    tensor = clp.paste()
-    pil = GetPILImageFromClipboard()
-    if pil:
-        pil.show()
-    else:
-        print("Clipboard does not contain an image")
-
+    try:
+        tensor = clp.paste()[0]
+        if tensor is not None:
+            print(f"{tensor.shape}")
+        pil = GetPILImageFromClipboard()
+        if pil is None:
+            raise UnidentifiedImageError
+        else:
+            for p in pil:
+                p.show()
+    except UnidentifiedImageError:
+        print("Clipboard does not contain images")
 
 
 if __name__ == "__main__":
