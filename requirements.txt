@@ -1,2 +1,4 @@
+numpy
 sympy
+pillow
 pillow-avif-plugin
