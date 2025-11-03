@@ -40,6 +40,19 @@ class PasteImage():
                    },
                 }
 
+    @classmethod
+    def IS_CHANGED(cls, alt_image: Tensor | None = None) -> str:
+        sha = sha256()
+        img = GetPILImageFromClipboard()
+        if img is None:
+            if alt_image is not None:
+                sha.update(alt_image.numpy().tobytes())
+        else:
+            for i in img:
+                sha.update(i.tobytes())
+
+        return sha.digest().hex()
+
 
     def paste(self, alt_image: Tensor | None = None) -> tuple[Tensor | None]:
         image = GetPILImageFromClipboard()
