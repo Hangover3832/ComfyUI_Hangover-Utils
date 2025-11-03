@@ -11,11 +11,12 @@ from PIL import ImageGrab, Image, UnidentifiedImageError
 from PIL.PngImagePlugin import PngImageFile
 from hashlib import sha256
 import pillow_avif
+from comfy.comfy_types import IO
 
 
 def GetPILImageFromClipboard() -> list[Image.Image] | None:
     """Get the image from clipboard and convert it to PIL Image."""
-    clip = ImageGrab.grabclipboard()
+    clip: Image.Image | list[str] | None = ImageGrab.grabclipboard() # ImageGrab.grabclipboard()
     if clip is None:
         return None
     elif isinstance(clip, list):
@@ -31,6 +32,7 @@ class PasteImage():
     FUNCTION = "paste"
     CATEGORY = "Hangover"
 
+
     @classmethod
     def INPUT_TYPES(cls):
         return {"optional": {
@@ -39,28 +41,13 @@ class PasteImage():
                 }
 
 
-    @classmethod
-    def IS_CHANGED(cls, alt_image: Tensor | None = None):
-        sha = sha256()
-        img = GetPILImageFromClipboard()
-        if img is None:
-            if alt_image is not None:
-                sha.update(alt_image.numpy().tobytes())
-        else:
-            for i in img:
-                sha.update(i.tobytes())
-
-        return sha.digest().hex()
-
-
     def paste(self, alt_image: Tensor | None = None) -> tuple[Tensor | None]:
-        result = None
         image = GetPILImageFromClipboard()
         if image is not None:
             result = np.array(object=image).astype(dtype=np.float32) / 255.0
             result = from_numpy(result)
             print(f"Clipboard contains {result.shape[0]} image{'s' if result.shape[0]>1 else ''}: {result.shape=}")
-        elif alt_image is not None:
+        else:
             result = alt_image
 
         if result is None:
@@ -70,21 +57,25 @@ class PasteImage():
 
 
 def run_test():
-    print(f"{PasteImage.IS_CHANGED()=}")
-    clp: PasteImage = PasteImage()
-    print(f"{clp.INPUT_TYPES()=}")
+    clp_paste = PasteImage()
+    print(f"{clp_paste.INPUT_TYPES()=}")
     try:
-        tensor = clp.paste()[0]
-        if tensor is not None:
-            print(f"{tensor.shape}")
         pil = GetPILImageFromClipboard()
         if pil is None:
             raise UnidentifiedImageError
         else:
             for p in pil:
                 p.show()
+
+        tensor = clp_paste.paste()[0]
+        if tensor is not None:
+            print(f"{tensor.shape=}")
+
+
     except UnidentifiedImageError:
-        print("Clipboard does not contain images")
+        print("Clipboard does not contain image(s)")
+    except:
+        raise
 
 
 if __name__ == "__main__":

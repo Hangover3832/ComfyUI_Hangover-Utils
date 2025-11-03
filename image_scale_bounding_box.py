@@ -39,10 +39,10 @@ class ImageScaleBoundingBox:
         new_width = round(number=w * scale_by)
         new_height = round(number=h * scale_by)
         samples = comfy.utils.common_upscale(
-            samples=image.movedim(source=-1, destination=1), 
+            samples=image.movedim(source=-1, destination=1), # prepare the shape for common_upscale()
             width=new_width, height=new_height, 
             upscale_method=upscale_method, crop="disabled"
-            ).movedim(source=1, destination=0)
+            ).movedim(source=1, destination=0) # make RGB channels to be dimension 0 makes padding easier later on
 
         if padding in self.PADDING:
             # padding for the case 'center':
@@ -52,7 +52,7 @@ class ImageScaleBoundingBox:
             pad_bottom = box_height - new_height - pad_top # ensure that we do not get any rounding error in the output image size
  
             # override padding for the cases 'top', 'left', 'right', and 'bottom':
-            match padding:
+            match padding.lower():
                 case "top":
                     pad_bottom = 0
                     pad_top = box_height - new_height
@@ -68,10 +68,12 @@ class ImageScaleBoundingBox:
 
             pad = (pad_left, pad_right, pad_top, pad_bottom)
             b, g, r = [((pad_color >> (i * 8)) & 0xFF) / 255. for i in range(3)] # extract rgb values from pad_color
+
+            # apply padding on each color channel and restack the tensor:
             samples = torch.stack(
                         tensors=[F.pad(input=samples[i], 
                         pad=pad, mode='constant', value=value
                         ) for i, value in enumerate(iterable=(r, g, b))])
 
-        samples = samples.movedim(source=0, destination=-1) # restore the original shape of the image
-        return (samples,)
+        samples = samples.movedim(source=0, destination=-1) # restore the original shape of the image tensor
+        return samples,
