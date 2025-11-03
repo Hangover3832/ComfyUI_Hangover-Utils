@@ -11,16 +11,17 @@
 * Removed: Microsoft Kosmos2 interrogator.
 * New node: Sympy Math Interpreter 🆕
 * New node: Image Clipboard Paster 🆕
-
+* New node: Image Clipboard Copy 🆕
+* Updated Save Image node: It now can also copy the image to the clipboard
 
 ## Nodes overview:
 
 - Powerful math in ComfyUI: Sympy Math Interpreter
-- Stable Diffusion Privacy: Save Image with or without Metadata
+- Stable Diffusion Privacy: Save Image with or without Metadata with copy to clipboard function
 - Scale an Image To A Bounding Box
 - Easily make an inpainting version of any SD1.5 model
-- Image clipboard paster: Paste image(s) from your clipboard into ComfyUI
-
+- Image Clipboard Paster: Paste image(s) from your clipboard into ComfyUI
+- Image Clipboard Copy: Copy image to the clipboard (node might need some dependencies)
 
 ---
 
@@ -34,22 +35,21 @@ Based on [SymPy](https://www.sympy.org/en/index.html), this node brings powerful
 
 6 input variables are available (a, b, c, d, e, f)
 
-* <code>round(a/b)</code>
-* <code>min(max(a,b),c)</code>
-* <code>diff(a*x**+b*x+c,x)</code> (symbolic differentiation)
-* <code>diff(a*x**+b*x+c,x).subs({x:d})</code> (differentiate, substitute and evaluate at point d)
-* <code>integrate(exp(-x**2),(x,a,b))</code> (numerical integrate from a to b)
-
-
+* `round(a/b)`
+* `min(max(a,b),c)`
+* `diff(a*x**3+b*x**2+c,x)` (symbolic differentiation)
+* `diff(a*x**2+b*x+c,x).subs({x:d})` (differentiate, substitute and evaluate at point d)
+* `integrate(exp(-x**2),(x,a,b))` (numerical integration from a to b)
+ 
 See [Examples](examples/examples.md) [example workflow](examples/d__sympy.json)
 
 ---
 
 ### Node: Save Image w/o Metadata
 
-![](img/workflow.png)
+![](img/save_image.png)
 
-With this custom save image node, you can preview or save, include or exclude the ComfyUI workflow metadata in the image. It is a derivation of ComfyUI's built-in save image node. Note that you can always right click on the image to save, it will also include the workflow if activated.
+With this custom save image node, you can preview or save, include or exclude the ComfyUI workflow metadata in the image. It is a derivation of ComfyUI's built-in save image node. Note that you can always right click on the image to save, it will also include the workflow if activated. IT can also copy the image to the clipboard if desired.
 
 ---
 
