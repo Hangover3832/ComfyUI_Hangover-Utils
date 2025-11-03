@@ -6,13 +6,13 @@
 
 ![Numerical derivation](../img/math_diff.png)
 
-Numerical 1st derivation of the second-degree polynomial <code>0.8*x^2+1.8*x+8.9</code> at the point <code>5.6</code>. With the first node, a symbolic first derivation is calculated, which is then evaluated by the second node at point 5.6.
+Numerical 1st derivation of the second-degree polynomial `0.8*x^2+1.8*x+8.9` at the point `5.6`. With the first node, a symbolic first derivation is calculated, which is then evaluated by the second node at point `5.6`.
 
 ### Numerical integration
 
 ![alt text](../img/math_integr.png)
 
-Numerical integration of the function <code>e^(-x^2)</code> within the limits <code>-20..20</code>
+Numerical integration of the function `e^(-x^2)` within the limits `-20..20`
 
 ### Calculate image dimensions
 
