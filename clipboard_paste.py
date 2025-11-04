@@ -14,16 +14,15 @@ import pillow_avif # this adds avif support to PIL
 from comfy.comfy_types import IO
 
 
-def GetPILImageFromClipboard() -> Generator[Image.Image, None, None]: # -> list[Image.Image] | None:
-    """Get the image from clipboard, convert it to PIL Image and yield the image."""
-    clip: Image.Image | list[str] | None = ImageGrab.grabclipboard() # ImageGrab.grabclipboard()
+def GetPILImageFromClipboard() -> Generator[Image.Image, None, None]:
+    """Get the image(s) from clipboard, convert and yield the image."""
 
+    clip: Image.Image | list[str] | None = ImageGrab.grabclipboard()
     if clip is None:
         return
     elif isinstance(clip, list):
-        for i in clip:
-            img = Image.open(i)
-            yield img
+        for img in clip:
+            yield Image.open(fp=img)
     elif isinstance(clip, Image.Image):
         yield Image.frombytes(mode=clip.mode, size=clip.size, data=clip.tobytes())
     else:
@@ -37,11 +36,12 @@ class PasteImage():
 
 
     @classmethod
-    def INPUT_TYPES(cls):
+    def INPUT_TYPES(cls) -> dict[str, dict[str, tuple[IO]]]:
         return {"optional": {
-                   "alt_image": ("IMAGE",),
+                   "alt_image": (IO.IMAGE,),
                    },
                 }
+
 
     @classmethod
     def IS_CHANGED(cls, alt_image: torch.Tensor | None = None) -> str:
@@ -55,7 +55,6 @@ class PasteImage():
 
 
     def paste(self, alt_image: torch.Tensor | None = None) -> tuple[torch.Tensor | None, torch.Tensor | None]:
-
         samples: torch.Tensor | None = None
         mask: torch.Tensor | None = None
 

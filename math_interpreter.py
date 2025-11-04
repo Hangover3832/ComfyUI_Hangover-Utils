@@ -9,6 +9,7 @@ from comfy.comfy_types import IO
 import math
 from typing import Any
 
+
 class Sympy_Interpreter:
     RETURN_TYPES = (
         IO.INT,
@@ -30,10 +31,10 @@ class Sympy_Interpreter:
 
     # Define the input variables dictionary:
     Input_Vars: list[str] = [chr(c + ord("a")) for c in range(Config["num_vars"])]
-    Variables: dict[str, tuple] = {key: (IO.ANY,) for key in Input_Vars}
+    Variables: dict[str, tuple] = {key: (IO.NUMBER,) for key in Input_Vars}
 
     @classmethod
-    def INPUT_TYPES(cls) -> dict[str, dict]:
+    def INPUT_TYPES(cls) -> dict[str, dict[str, tuple]]:
         return {
             "required": {
                 "expression": (IO.STRING, {"multiline": False, "default": "0"},),
