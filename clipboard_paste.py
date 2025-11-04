@@ -4,39 +4,30 @@
 @nickname: Clipboard_Paste
 @description: Automatic paste the image from the clipboard
 """
-
-# from torch import Tensor, from_numpy
+from typing import Generator
 import torch
 import numpy as np
 from PIL import ImageGrab, Image, UnidentifiedImageError
 from PIL.PngImagePlugin import PngImageFile
 from hashlib import sha256
-import pillow_avif
+import pillow_avif # this adds avif support to PIL
 from comfy.comfy_types import IO
 
 
-def GetPILImageFromClipboard() -> list[Image.Image] | None:
-    """Get the image from clipboard and convert it to PIL Image."""
+def GetPILImageFromClipboard() -> Generator[Image.Image, None, None]: # -> list[Image.Image] | None:
+    """Get the image from clipboard, convert it to PIL Image and yield the image."""
     clip: Image.Image | list[str] | None = ImageGrab.grabclipboard() # ImageGrab.grabclipboard()
+
     if clip is None:
-        return None
-    
+        return
     elif isinstance(clip, list):
-        # r, g, b, a = img.split()
-        result = []
         for i in clip:
             img = Image.open(i)
-            img = img.convert(mode="RGBA" if len(img.split()) == 4 else "RGB")
-            result.append(img)
-        return result
-    
+            yield img
     elif isinstance(clip, Image.Image):
-        print(f"{clip.mode=}")
-        im = Image.frombytes(mode=clip.mode, size=clip.size, data=clip.tobytes())
-        return [im.convert(mode="RGBA")]
-    
+        yield Image.frombytes(mode=clip.mode, size=clip.size, data=clip.tobytes())
     else:
-        return None
+        return
 
 
 class PasteImage():
@@ -54,50 +45,71 @@ class PasteImage():
 
     @classmethod
     def IS_CHANGED(cls, alt_image: torch.Tensor | None = None) -> str:
-        """This is nessesary for the change in the clipboard to be recognized by ConfyUI"""
+        """nessesary for the change in the clipboard to be recognized by ConfyUI"""
         sha = sha256()
-        img = GetPILImageFromClipboard()
-        if img is None:
-            if alt_image is not None:
-                sha.update(alt_image.numpy().tobytes())
-        else:
-            for i in img:
-                sha.update(i.tobytes())
-
+        for img in GetPILImageFromClipboard():
+            sha.update(img.tobytes())
+        if alt_image is not None:
+            sha.update(alt_image.numpy().tobytes())
         return sha.digest().hex()
 
 
     def paste(self, alt_image: torch.Tensor | None = None) -> tuple[torch.Tensor | None, torch.Tensor | None]:
-        images = GetPILImageFromClipboard()
-        mask = None
-        if images is not None:
-            result: torch.Tensor | None = torch.from_numpy((np.array(images, dtype=np.float32) / 255.))
-            print(f"Clipboard contains {result.shape[0]} image{'s' if result.shape[0]>1 else ''}: {result.shape=}")
-            if result.shape[3] == 4:
-                # looks like we have an alpha channel
-                mask = 1. - result[:, :, :, 3]
-                result = result[:, :, :, :3]
+
+        samples: torch.Tensor | None = None
+        mask: torch.Tensor | None = None
+
+        for image in GetPILImageFromClipboard():
+            if image.mode == 'I':
+                image = image.point(lambda i: i/255)
+
+            """
+            convert the image to a tensor and add a batch dimension.
+            since image.convert() throws an anoing warning to console if a palette image with transparency
+            is converted with "RGB", so we alway convert to RGBA and trow away the extra channel in the tensor.
+            """
+            s = torch.from_numpy(
+                        np.array(object=image.convert(mode="RGBA", )
+                        ).astype(dtype=np.float32)/255.
+                        )[None,:,:,:3]
+
+            # extract the alpha channel if it exists and convert it to a mask tensor with an extra batch dimension:
+            if 'A' in image.getbands():
+                m = 1.0 - torch.from_numpy(
+                    np.array(object=image.getchannel(channel='A')
+                    ).astype(dtype=np.float32) / 255.0)[None,]
+            elif 'P' in image.mode and 'transparency' in image.info:
+                m = 1.0 - torch.from_numpy(
+                    np.array(object=image.convert(mode='RGBA').getchannel(channel='A')
+                    ).astype(dtype=np.float32) / 255.0)[None,]
             else:
-                mask = torch.zeros(size=(64,64), dtype=torch.float32, device="cpu").unsqueeze(dim=0)
-        else:
-            result = alt_image
+                m = torch.zeros(size=(1, 64, 64))
 
-        if result is None:
-            raise UnidentifiedImageError("Error: No valid image found in the clipboard.")
+            if samples is None:
+                samples = s
+            else:
+                samples = torch.cat(tensors=(samples, s), dim=0)
 
-        return result, mask,
+            if mask is None:
+                mask = m
+            else:
+                mask = torch.cat(tensors=(mask, m), dim=0)
+
+        if samples is None:
+            samples = alt_image
+            if alt_image is not None and alt_image.shape[3] == 4:
+                # extract the mask from the alternative input image
+                mask = 1. - alt_image[:, :, :, 3]
+
+        return samples, mask,
 
 
 def run_test():
     clp_paste = PasteImage()
     print(f"{clp_paste.INPUT_TYPES()=}")
     try:
-        pil = GetPILImageFromClipboard()
-        if pil is None:
-            raise UnidentifiedImageError
-        else:
-            for p in pil:
-                p.show()
+        for img in GetPILImageFromClipboard():
+            img.show()
 
         tensor, mask = clp_paste.paste()
         if tensor is None:
@@ -106,7 +118,7 @@ def run_test():
             print(f"{tensor.shape=}")
 
         if mask is None:
-            print("no mask")
+            print("No mask")
         else:
             print(f"{mask.shape=}")
 
