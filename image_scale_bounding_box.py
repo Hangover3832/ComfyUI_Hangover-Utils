@@ -4,35 +4,38 @@
 @nickname: Hangover-Image_Scale_Bouning_Box
 @description: Scales an input image into a given box size, whereby the aspect ratio keeps retained.
 """
-
 from nodes import MAX_RESOLUTION
 import comfy.utils
 import torch.nn.functional as F
 import torch
+from comfy.comfy_types.node_typing import ComfyNodeABC, InputTypeDict, IO, StrEnum
+
+class PAD(StrEnum): # Padding Type
+    none = "none"; centered = "center"; top = "top"; left = "left"; right = "right"; bottom = "bottom"
 
 
-class ImageScaleBoundingBox:
-
-    UPSCALE_METHOD = ["lanczos", "nearest-exact", "bilinear", "area", "bicubic"]
-    PADDING = ["center", "top", "left", "right", "bottom"]
-    RETURN_TYPES = ("IMAGE",)
+class ImageScaleBoundingBox(ComfyNodeABC):
+    UPSCALE_METHOD: list[str] = ["lanczos", "nearest-exact", "bilinear", "area", "bicubic"]
+    PADDING: list[PAD] = [PAD.none, PAD.centered, PAD.top, PAD.left, PAD.right, PAD.bottom]
+    RETURN_TYPES: tuple[IO] = IO.IMAGE,
     FUNCTION = "upscale"
     CATEGORY = "Hangover"
 
+
     @classmethod
-    def INPUT_TYPES(cls):
+    def INPUT_TYPES(cls) -> InputTypeDict:
         return {"required": {
-                    "image": ("IMAGE",),
-                    "upscale_method": (cls.UPSCALE_METHOD,),
-                    "box_width": ("INT", {"default": 512, "min": 1, "max": MAX_RESOLUTION, "step": 1},),
-                    "box_height": ("INT", {"default": 512, "min": 1, "max": MAX_RESOLUTION, "step": 1},),
-                    "padding": (["none"] + cls.PADDING,),
-                    "pad_color": ("INT", {"default": 0, "min": 0, "max": 0xFFFFFF, "step": 1, "display": "pad_color"},),
+                    "image": (IO.IMAGE, {}),
+                    "upscale_method": (IO.COMBO, {"options": list(cls.UPSCALE_METHOD), "default": cls.UPSCALE_METHOD[0], "placeholder": "select upscale method.."}), 
+                    "box_width": (IO.INT, {"default": 512, "min": 1, "max": MAX_RESOLUTION, "step": 1}),
+                    "box_height": (IO.INT, {"default": 512, "min": 1, "max": MAX_RESOLUTION, "step": 1}),
+                    "padding": (IO.COMBO, {"options": list(cls.PADDING), "default": PAD.none, "placeholder": "select padding..."}),
+                    "pad_color": (IO.INT, {"default": 0, "min": 0, "max": 0xFFFFFF, "step": 1}),
                     }
                 }
 
 
-    def upscale(self, image: torch.Tensor, upscale_method: str, box_width: int, box_height: int, padding: str, pad_color: int) -> tuple[torch.Tensor]:
+    def upscale(self, image: torch.Tensor, upscale_method: str, box_width: int, box_height: int, padding: PAD, pad_color: int) -> tuple[torch.Tensor]:
         w = image.shape[2]
         h = image.shape[1]
         scale_by = min(box_width/w, box_height/h)
@@ -44,7 +47,7 @@ class ImageScaleBoundingBox:
             upscale_method=upscale_method, crop="disabled"
             ).movedim(source=1, destination=0) # make RGB channels to be dimension 0 makes padding easier later on
 
-        if padding in self.PADDING:
+        if padding != PAD.none:
             # padding for the case 'center':
             pad_left = (box_width - new_width) // 2
             pad_right = box_width - new_width - pad_left
@@ -52,17 +55,17 @@ class ImageScaleBoundingBox:
             pad_bottom = box_height - new_height - pad_top # ensure that we do not get any rounding error in the output image size
  
             # override padding for the cases 'top', 'left', 'right', and 'bottom':
-            match padding.lower():
-                case "top":
+            match padding:
+                case PAD.top:
                     pad_bottom = 0
                     pad_top = box_height - new_height
-                case "left":
+                case PAD.left:
                     pad_right = 0
                     pad_left = box_width - new_width
-                case "right":
+                case PAD.right:
                     pad_left = 0
                     pad_right = box_width - new_width
-                case "bottom":
+                case PAD.bottom:
                     pad_top = 0
                     pad_bottom = box_height - new_height
 

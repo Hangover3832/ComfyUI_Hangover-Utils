@@ -1,11 +1,11 @@
-from comfy.comfy_types import IO
+from comfy.comfy_types.node_typing import IO, ComfyNodeABC, InputTypeDict
 from typing import Any
 import json
 import functools
 import torch
 
 
-class WorkFlowData:
+class WorkFlowData(ComfyNodeABC):
     def get_nested_value(self, data, keys) -> Any:
         """recursively dismantle the data object until the 'dot.formatet.key' is found, or en exception is trown if not"""
 
@@ -38,12 +38,12 @@ class GetWorkflowData(WorkFlowData):
 
 
     @classmethod
-    def INPUT_TYPES(cls) -> dict[str, dict]:
+    def INPUT_TYPES(cls) -> InputTypeDict:
         return {"required": {
                     "field_name": (IO.STRING, {"default": "_meta.title"}),
                     },
                 "optional": {
-                    cls.NODE_INPUT_NAME: (IO.ANY,),
+                    cls.NODE_INPUT_NAME: (IO.ANY, {}),
                 },
                 "hidden": {
                     "prompt": "PROMPT", 
@@ -88,8 +88,8 @@ class GetGenerationData(WorkFlowData):
     CATEGORY = "Hangover"
 
     @classmethod
-    def INPUT_TYPES(cls) -> dict[str, dict]:
-        return {"required": {"ksampler": (IO.LATENT,),},
+    def INPUT_TYPES(cls) -> InputTypeDict:
+        return {"required": {"ksampler": (IO.LATENT, {}),},
                 "hidden": {
                     "prompt": "PROMPT", 
                     "unique_id": "UNIQUE_ID",

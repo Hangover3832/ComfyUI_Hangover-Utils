@@ -5,12 +5,12 @@
 @description: A mathematic expression interpreter based on the sympy library
 """
 from sympy.parsing.sympy_parser import parse_expr
-from comfy.comfy_types import IO
 import math
 from typing import Any
+from comfy.comfy_types.node_typing import ComfyNodeABC, IO, InputTypeDict
 
 
-class Sympy_Interpreter:
+class Sympy_Interpreter(ComfyNodeABC):
     RETURN_TYPES = (
         IO.INT,
         IO.FLOAT,
@@ -34,7 +34,7 @@ class Sympy_Interpreter:
     Variables: dict[str, tuple] = {key: (IO.NUMBER,) for key in Input_Vars}
 
     @classmethod
-    def INPUT_TYPES(cls) -> dict[str, dict[str, tuple]]:
+    def INPUT_TYPES(cls) -> InputTypeDict:
         return {
             "required": {
                 "expression": (IO.STRING, {"multiline": False, "default": "0"},),

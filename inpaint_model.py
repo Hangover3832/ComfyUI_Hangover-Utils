@@ -4,35 +4,35 @@
 @nickname: Hangover-Inpaint_Model
 @description: Easy make an inpaint version of any model on the fly.
 """
-
 import folder_paths
 import comfy.sd
 from comfy.model_patcher import ModelPatcher
+from comfy.comfy_types.node_typing import IO, ComfyNodeABC, InputTypeDict
 
-class MakeInpaintModel():
 
-    V1_5_PRUNED = "Please select the original SD 1.5 pruned model"
-    V1_5_INPAINT = "Please select the original SD 1.5 inpaint model"
-    ckpts = folder_paths.get_filename_list(folder_name="checkpoints")
+class MakeInpaintModel(ComfyNodeABC):
+    V1_5_PRUNED: str = "Please select the original SD 1.5 pruned model"
+    V1_5_INPAINT: str = "Please select the original SD 1.5 inpaint model"
+    ckpts: list[str] = folder_paths.get_filename_list(folder_name="checkpoints")
     for f in ckpts:
         if "v1-5-pruned-emaonly." in f.lower():
             V1_5_PRUNED = f
         if "v1-5-inpainting." in f.lower():
             V1_5_INPAINT = f
 
+
     @classmethod
-    def INPUT_TYPES(cls):
+    def INPUT_TYPES(cls) -> InputTypeDict:
         return {"required": {
-                    "model": ("MODEL",),
-                    "sd1_5_pruned": (cls.ckpts,{"default": cls.V1_5_PRUNED}),
-                    "sd1_5_inpaint": (cls.ckpts,{"default": cls.V1_5_INPAINT}),
+                    "model": (IO.MODEL, {}),
+                    "sd1_5_pruned": (IO.COMBO, {"options": list(cls.ckpts), "default": cls.V1_5_PRUNED}),
+                    "sd1_5_inpaint": (IO.COMBO, {"options": list(cls.ckpts), "default": cls.V1_5_INPAINT})
                     }
                 }
 
 
-    RETURN_TYPES = ("MODEL",)
+    RETURN_TYPES = IO.MODEL,
     FUNCTION = "merge"
-    OUTPUT_NODE = False
     CATEGORY = "Hangover"
 
 
@@ -51,19 +51,17 @@ class MakeInpaintModel():
         if ip and pr:
             kp = pr.get_key_patches(filter_prefix="diffusion_model.")
             for k in kp:
-                ip.add_patches(patches={k: kp[k]}, strength_patch=-1.0, strength_model=1.0)
+                ip.add_patches(patches={k: kp[k]}, strength_patch=-1.0, strength_model=1.0) # sd1_5_inpaint - sd1_5_pruned
 
             # add the input model (diff + model)
-            kp = model.clone().get_key_patches("diffusion_model.")
+            kp = model.clone().get_key_patches(filter_prefix="diffusion_model.")
             for k in kp:
-                ip.add_patches(patches={k: kp[k]}, strength_patch=1.0, strength_model=1.0)
-
-            return ip,
-        
+                ip.add_patches(patches={k: kp[k]}, strength_patch=1.0, strength_model=1.0) # + model
+            return ip,    
         return None,
 
 
-def run_test():
+def run_test() -> None:
     from nodes import CheckpointLoaderSimple
 
     ipm = MakeInpaintModel()
@@ -71,7 +69,7 @@ def run_test():
     pruned_model = ipm.V1_5_PRUNED
     print(f"{inpaint_model=}, {pruned_model=}")
     model = CheckpointLoaderSimple().load_checkpoint(ckpt_name=pruned_model)[0]
-    ipm.merge(model=model, sd1_5_pruned=MakeInpaintModel.V1_5_PRUNED, sd1_5_inpaint=MakeInpaintModel.V1_5_INPAINT) # type: ignore
+    ipm.merge(model=model, sd1_5_pruned=MakeInpaintModel.V1_5_PRUNED, sd1_5_inpaint=MakeInpaintModel.V1_5_INPAINT)
     print("Test run succesful")
 
 

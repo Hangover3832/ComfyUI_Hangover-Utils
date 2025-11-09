@@ -8,19 +8,20 @@
 from torch import Tensor
 from PIL import Image
 import numpy as np
-from comfy.comfy_types import IO
+from comfy.comfy_types.node_typing import IO, ComfyNodeABC, InputTypeDict
 from pyperclipimg import copy
 
-class CopyImage():
+
+class CopyImage(ComfyNodeABC):
     RETURN_TYPES = IO.IMAGE,
     FUNCTION = "copy"
     CATEGORY = "Hangover"
 
 
     @classmethod
-    def INPUT_TYPES(cls):
+    def INPUT_TYPES(cls) -> InputTypeDict:
         return {"required": {
-                   "image": (IO.IMAGE,),
+                   "image": (IO.IMAGE, {}),
                    },
                 }
 

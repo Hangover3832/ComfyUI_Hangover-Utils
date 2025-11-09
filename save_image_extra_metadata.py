@@ -4,13 +4,14 @@
 @nickname: Hangover-Save_Image_Extra_Metadata
 @description: Display, save or not save image, with or without extra metadata.
 """
-
+from typing import Any
 from nodes import SaveImage
 import folder_paths
 import random
 from torch import Tensor
 from PIL import Image
 import numpy as np
+from comfy.comfy_types.node_typing import IO, InputTypeDict
 
 
 class SaveImage_NoWorkflow(SaveImage):
@@ -19,7 +20,7 @@ class SaveImage_NoWorkflow(SaveImage):
     This node lets choise if the image itself, and/or the workflow get saved within the image.
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__()
 
     input_types = {"required": 
@@ -37,8 +38,20 @@ class SaveImage_NoWorkflow(SaveImage):
 
 
     @classmethod
-    def INPUT_TYPES(cls) -> dict[str, dict]:
-        return cls.input_types
+    def INPUT_TYPES(cls) -> InputTypeDict: # type: ignore
+        return {
+            "required": {
+                "images": (IO.IMAGE, {}), 
+                "filename_prefix": (IO.STRING, {"default": "ComfyUI"}),
+                "save_image": (IO.BOOLEAN, {"default": True}),
+                "include_workflow": (IO.BOOLEAN, {"default": True}),
+                "copy_to_clipboard": (IO.BOOLEAN, {"default": False}),
+            },
+            "hidden": {
+                "prompt": "PROMPT", 
+                "extra_pnginfo": "EXTRA_PNGINFO",
+            }
+        }
 
 
     RETURN_TYPES = ()
