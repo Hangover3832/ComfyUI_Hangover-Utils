@@ -31,3 +31,12 @@ _Automatic fit an openpose image to the output image size_
 
 ![Alt text](../img/inpaint_model_example.png) \
 _Perfect inpainting with an appropriate inpainting model_
+
+
+## Extract metadata data from a node
+
+![alt text](../img/workflow_data_prompt.png)
+_Extract the prompt from a Clip Text Encode node_
+
+![alt text](../img/workflow_data_sampler.png)
+_Extract cfg value and sampler name from a KSampler_

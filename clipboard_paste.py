@@ -94,16 +94,10 @@ class PasteImage():
             else:
                 mask = torch.cat(tensors=(mask, m), dim=0)
 
-        if samples is None:
-            samples = alt_image
-            if alt_image is not None and alt_image.shape[3] == 4:
-                # extract the mask from the alternative input image
-                mask = 1. - alt_image[:, :, :, 3]
-
         return samples, mask,
 
 
-def run_test():
+def run_test() -> None:
     clp_paste = PasteImage()
     print(f"{clp_paste.INPUT_TYPES()=}")
     try:

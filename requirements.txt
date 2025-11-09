@@ -3,3 +3,4 @@ sympy
 pillow
 pillow-avif-plugin
 pyperclipimg
+pyperclip
