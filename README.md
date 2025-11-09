@@ -13,6 +13,7 @@
 * New node: Image Clipboard Paster 🆕
 * New node: Image Clipboard Copy 🆕
 * Updated Save Image node: It now can also copy the image to the clipboard
+* New node: Extract workflow and node metadata 🆕
 
 ## Nodes overview:
 
@@ -22,6 +23,7 @@
 - Easily make an inpainting version of any SD1.5 model
 - Image Clipboard Paster: Paste image(s) from your clipboard into ComfyUI
 - Image Clipboard Copy: Copy image to the clipboard (node might need some dependencies)
+- Get Workflow Data: Extract any field value from a node that is connected to the input.
 
 ---
 
@@ -70,6 +72,15 @@ This node scales an input image into a given box size, whereby the aspect ratio 
 - [sd-v1-5-inpainting.ckpt](https://huggingface.co/runwayml/stable-diffusion-inpainting/blob/main/sd-v1-5-inpainting.ckpt)
 
 They are needed for the calculation.
+
+[See examples](examples/examples.md)
+
+---
+
+### Node: Get Workflow Data
+![alt text](img/workflow_data.png)
+
+Extract the workflow or any field name from a node that is connected to this input.
 
 [See examples](examples/examples.md)
 

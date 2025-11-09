@@ -3,6 +3,8 @@ from .image_scale_bounding_box import ImageScaleBoundingBox
 from .inpaint_model import MakeInpaintModel
 from .math_interpreter import Sympy_Interpreter
 from .clipboard_paste import PasteImage
+from .text_encode_wildcards import TextEncodeWildcards
+from .get_workflow_data import GetWorkflowData, GetGenerationData
 
 # A dictionary that contains all nodes you want to export with their names
 # NOTE: names should be globally unique
@@ -12,6 +14,9 @@ NODE_CLASS_MAPPINGS: dict[str, object] = {
     "Make Inpaint Model": MakeInpaintModel,
     "Sympy Math Interpreter": Sympy_Interpreter,
     "Image Clipboard Paster": PasteImage,
+    "Text Encode Wildcards": TextEncodeWildcards,
+    "Get Workflow Data": GetWorkflowData,
+    # "Get Generation Data": GetGenerationData,
 }
 
 
