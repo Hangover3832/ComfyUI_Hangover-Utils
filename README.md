@@ -14,6 +14,8 @@
 * New node: Image Clipboard Copy 🆕
 * Updated Save Image node: It now can also copy the image to the clipboard
 * New node: Extract workflow and node metadata 🆕
+* New node: Simple wildcard prompt parser 🆕
+
 
 ## Nodes overview:
 
@@ -24,6 +26,7 @@
 - Image Clipboard Paster: Paste image(s) from your clipboard into ComfyUI
 - Image Clipboard Copy: Copy image to the clipboard (node might need some dependencies)
 - Get Workflow Data: Extract any field value from a node that is connected to the input.
+- Text Encode Wildcards: Very simple and basic {wildcard} parser and prompt clipboard paster.
 
 ---
 
@@ -85,6 +88,12 @@ Extract the workflow or any field name from a node that is connected to this inp
 [See examples](examples/examples.md)
 
 ---
+
+### Node: Text Encode Wildcards
+
+![alt text](img/wildcards.PNG)
+
+A very simple wildcards parser. Make sure you have wildcards text files placed in your comfyui/models/wildcards folder. The node can also paste a text prompt from the clipboard that will be used instead of the text input field.
 
 ## Installation
 

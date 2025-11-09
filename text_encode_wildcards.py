@@ -82,8 +82,9 @@ class TextEncodeWildcards(ComfyNodeABC):
         if not wildcards:
             print(f"Text Encode Wildcards: Warning: No wildcard files were found.")
             return prompt,
-        else:
-            return (clp,) if (clp := pyperclip.paste()) and prompt_from_clipboard else (prompt,)
+
+        prompt = clp if (clp := pyperclip.paste()) and prompt_from_clipboard else prompt
+        return self.replace_placeholder(prompt=prompt, seed=seed),
 
 
 def Run_Tests() -> None:
