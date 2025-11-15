@@ -4,18 +4,18 @@
 @nickname: Clipboard_Paste
 @description: Automatic paste the image from the clipboard
 """
-from typing import Any, Generator, Literal
+from _hashlib import HASH
+from typing import Generator
 import torch
 import numpy as np
 from PIL import ImageGrab, Image, UnidentifiedImageError
-from PIL.PngImagePlugin import PngImageFile
 from hashlib import sha256
 import pillow_avif # this adds avif support to Pillow
 from comfy.comfy_types.node_typing import IO, InputTypeDict, ComfyNodeABC
 
 
 class PasteImage(ComfyNodeABC):
-    RETURN_TYPES = IO.IMAGE, IO.MASK,
+    RETURN_TYPES: tuple[IO, IO] = IO.IMAGE, IO.MASK,
     FUNCTION = "paste"
     CATEGORY = "Hangover"
     DESCRIPTION = """
@@ -41,7 +41,6 @@ class PasteImage(ComfyNodeABC):
         else:
             return
 
-
     @classmethod
     def INPUT_TYPES(cls) -> InputTypeDict:
         return {"optional": {
@@ -49,15 +48,13 @@ class PasteImage(ComfyNodeABC):
                    },
                 }
 
-
     @classmethod
     def IS_CHANGED(cls, alt_image: torch.Tensor | None = None) -> str:
         # nessesary for the change in the clipboard to be recognized by ConfyUI
-        sha = sha256()
+        sha: HASH = sha256()
         for img in cls.GetPILImageFromClipboard():
             sha.update(img.tobytes())
         return sha.digest().hex()
-
 
     def paste(self, alt_image: torch.Tensor | None = None) -> tuple[torch.Tensor, torch.Tensor]:
         samples: torch.Tensor | None = None
@@ -72,19 +69,19 @@ class PasteImage(ComfyNodeABC):
             since image.convert() throws an anoing warning to console if a palette image with transparency
             is converted with "RGB", so we alway convert to RGBA and trow away the extra channel in the tensor.
             """
-            s = torch.from_numpy(
+            s: torch.Tensor = torch.from_numpy(
                         np.array(object=image.convert(mode="RGBA", )
                         ).astype(dtype=np.float32)/255.
                         )[None,:,:,:3]
 
             # extract the alpha channel if it exists and convert it to a mask tensor with an extra batch dimension:
             if 'A' in image.getbands():
-                m = 1.0 - torch.from_numpy(
-                    ndarray=np.array(object=image.getchannel(channel='A')
+                m: torch.Tensor = 1.0 - torch.from_numpy(
+                    np.array(image.getchannel(channel='A')
                     ).astype(dtype=np.float32) / 255.0)[None,]
             elif 'P' in image.mode and 'transparency' in image.info:
                 m = 1.0 - torch.from_numpy(
-                    ndarray=np.array(object=image.convert(mode='RGBA').getchannel(channel='A')
+                    np.array(image.convert(mode='RGBA').getchannel(channel='A')
                     ).astype(dtype=np.float32) / 255.0)[None,]
             else:
                 m = torch.zeros(size=(1, 64, 64))
