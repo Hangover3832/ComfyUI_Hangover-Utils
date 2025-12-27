@@ -11,23 +11,17 @@ from comfy.comfy_types.node_typing import ComfyNodeABC, IO, InputTypeDict
 
 
 class Sympy_Interpreter(ComfyNodeABC):
-    RETURN_TYPES = (
-        IO.INT,
-        IO.FLOAT,
-        IO.STRING,
-    )
-    RETURN_NAMES = (
-        "int_A",
-        "float_A",
-        "str_A",
-    )
+
+    RETURN_TYPES = IO.INT, IO.FLOAT, IO.STRING,
+    RETURN_NAMES = "int_A", "float_A", "str_A",
+    FUNCTION = "calc"
+    DESCRIPTION = """A powerful mathematical interpreter based on the sympy library"""
+    CATEGORY = "Hangover"
 
     Config = {
         "num_vars": 6,
     }
 
-    FUNCTION = "calc"
-    CATEGORY = "Hangover"
 
     # Define the input variables dictionary:
     Input_Vars: list[str] = [chr(c + ord("a")) for c in range(Config["num_vars"])]
