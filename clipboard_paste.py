@@ -9,7 +9,7 @@ from typing import Generator
 import torch
 import numpy as np
 from PIL import ImageGrab, Image, UnidentifiedImageError
-from hashlib import sha256
+from hashlib import md5
 import pillow_avif # this adds avif support to Pillow
 from comfy.comfy_types.node_typing import IO, InputTypeDict, ComfyNodeABC
 
@@ -25,21 +25,31 @@ class PasteImage(ComfyNodeABC):
         Muliple images in the clipboard are batched
         if they have the same size and format.
         """
+    
+    hash: HASH = md5()
 
     @classmethod
     def GetPILImageFromClipboard(cls) -> Generator[Image.Image, None, None]:
         """Get the image(s) from clipboard, convert and yield the image."""
 
-        clip: Image.Image | list[str] | None = ImageGrab.grabclipboard()
-        if clip is None:
+        try:
+            clip: Image.Image | list[str] | None = ImageGrab.grabclipboard()
+            if clip is None:
+                return
+            
+            if isinstance(clip, list):
+                    for img in clip:
+                        try:
+                            yield Image.open(fp=img)
+                        except FileNotFoundError:
+                            pass
+            elif isinstance(clip, Image.Image):
+                yield Image.frombytes(mode=clip.mode, size=clip.size, data=clip.tobytes())
+        except:
+            pass
+        finally:
             return
-        elif isinstance(clip, list):
-            for img in clip:
-                yield Image.open(fp=img)
-        elif isinstance(clip, Image.Image):
-            yield Image.frombytes(mode=clip.mode, size=clip.size, data=clip.tobytes())
-        else:
-            return
+
 
     @classmethod
     def INPUT_TYPES(cls) -> InputTypeDict:
@@ -51,10 +61,12 @@ class PasteImage(ComfyNodeABC):
     @classmethod
     def IS_CHANGED(cls, alt_image: torch.Tensor | None = None) -> str:
         # nessesary for the change in the clipboard to be recognized by ConfyUI
-        sha: HASH = sha256()
+        # cls.hash: HASH = md5()
         for img in cls.GetPILImageFromClipboard():
-            sha.update(img.tobytes())
-        return sha.digest().hex()
+            if cls.hash.digest().hex() != md5().digest().hex():
+                cls.hash = md5()
+            cls.hash.update(img.tobytes())
+        return cls.hash.digest().hex()
 
     def paste(self, alt_image: torch.Tensor | None = None) -> tuple[torch.Tensor, torch.Tensor]:
         samples: torch.Tensor | None = None
@@ -99,34 +111,48 @@ class PasteImage(ComfyNodeABC):
                 raise RuntimeError(f"Pasting multiple images of different shape is not supported:\n{e}")
  
         if samples is None or mask is None:
-            raise Exception("Clipboard does not conain valid image(s)!")
+            raise UnidentifiedImageError("Clipboard does not conain valid image(s)!")
 
-        return samples, mask,
+        return (samples, mask)
 
 
 def run_test() -> None:
+    from time import sleep
+
     print(f"{PasteImage.INPUT_TYPES()=}")
     clp_paste = PasteImage()
-    try:
-        for img in clp_paste.GetPILImageFromClipboard():
-            img.show()
+    old_sha = ""
 
-        tensor, mask = clp_paste.paste()
-        if tensor is None:
-            print("No image")
-        else:
-            print(f"{tensor.shape=}")
+    while True:
+        print("Listen for change...")
+        while (new_sha := clp_paste.IS_CHANGED()) == old_sha:
+            print(new_sha, end='\r', flush=True)
+            sleep(0.1)
 
-        if mask is None:
-            print("No mask")
-        else:
-            print(f"{mask.shape=}")
+        print(f"\n{new_sha}")
+        old_sha = clp_paste.IS_CHANGED()
 
-    except UnidentifiedImageError:
-        print("Clipboard does not contain image(s)")
-    except:
-        raise
+        try:
+            for img in clp_paste.GetPILImageFromClipboard():
+                print(img) #.show()
 
+            tensor, mask = clp_paste.paste()
+            if tensor is None:
+                print("No image")
+            else:
+                print(f"{tensor.shape=}")
+
+            if mask is None:
+                print("No mask")
+            else:
+                print(f"{mask.shape=}")
+
+        except UnidentifiedImageError:
+            print("Clipboard does not contain image(s)")
+        except:
+            raise
+        
+        sleep(0.1)
 
 if __name__ == "__main__":
     run_test()
