@@ -1,4 +1,3 @@
-from ctypes import sizeof
 import re
 from comfy.comfy_types.node_typing import IO, InputTypeDict, ComfyNodeABC
 from folder_paths import models_dir, get_folder_paths, add_model_folder_path, get_filename_list, get_full_path, filter_files_extensions
@@ -25,23 +24,29 @@ class WildcardFileDict(dict[str, list[Path]]):
         self.num_files = len(files)
 
         if files:
+            entries: dict[str, list[Path]] = {}
             self['*'] = self.root_folders # add the root path(s) as keyword '{*}'
             for file in files:
                 file_path = Path(get_full_path(folder_name=folder_name, filename=file)).absolute().resolve() # type: ignore
                 folder_path = file_path.parent.absolute().resolve()
-                file_folder_name = folder_path.stem.lower()
+                file_folder_name = folder_path.stem.lower() + '*'
                 file_name = file_path.stem.lower()
 
                 # add the file to the list in the dict:
                 if file_name in self.keys():
-                    self[file_name].append(file_path)
+                    entries[file_name].append(file_path)
                 else:
-                    self[file_name] = [file_path]
+                    entries[file_name] = [file_path]
 
                 # add the folder to the list in the dict...
                 if folder_path not in self.root_folders: # if its not one of the root folders
-                    if file_folder_name not in self.keys():
-                        self[file_folder_name] = [folder_path]
+                    if file_folder_name in entries.keys():
+                        if folder_path not in entries[file_folder_name]:
+                            entries[file_folder_name].append(folder_path)
+                    else:
+                        entries[file_folder_name] = [folder_path]
+
+            self.update(sorted(entries.items(), key=lambda item: item[0]))
         else:
             self.print_warning()
 
@@ -131,6 +136,7 @@ class TextEncodeWildcards(ComfyNodeABC):
 
     Wildcards_File_Dict: WildcardFileDict = WildcardFileDict(folder_name="wildcards", extensions=WILDCARD_EXTENSIONS)
 
+
     @classmethod
     def INPUT_TYPES(cls) -> InputTypeDict:
         return {
@@ -177,7 +183,7 @@ class TextEncodeWildcards(ComfyNodeABC):
 
 
 def test_dict():
-    f = WildcardFileDict(folder_name="wildcards", extensions=[".txt"])
+    f = TextEncodeWildcards.Wildcards_File_Dict
     print(repr(f))
     print(f)
 
