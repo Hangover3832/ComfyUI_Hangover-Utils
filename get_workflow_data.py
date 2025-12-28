@@ -30,20 +30,32 @@ class WorkFlowData(ComfyNodeABC):
 
 
 class GetWorkflowData(WorkFlowData):
-    RETURN_TYPES = IO.STRING, IO.STRING, IO.INT, IO.FLOAT,
-    RETURN_NAMES = "workflow_json", "field_value_str", "field_value_int", "field_value_float",
+    RETURN_TYPES = (IO.STRING, IO.STRING, IO.INT, IO.FLOAT, IO.STRING)
+    RETURN_NAMES = ("workflow_json", "field_value_str", "field_value_int", "field_value_float", "node_data")
     FUNCTION = "get_data"
     CATEGORY = "Hangover"
     NODE_INPUT_NAME = "node"
+    COMBO_INPUT_NAME = "combo"
+
+    DESCRIPTION = f"""
+        This node extracts data from the node that is
+        connected to the {NODE_INPUT_NAME} or {COMBO_INPUT_NAME} input.
+        The field_value output is concatenated with
+        value_prefix + field_value_str + value_suffix.
+        If the {COMBO_INPUT_NAME} input is used, the <field_name> is ignored.
+    """
 
 
     @classmethod
     def INPUT_TYPES(cls) -> InputTypeDict:
         return {"required": {
-                    "field_name": (IO.STRING, {"default": "_meta.title"}),
+                    "value_prefix": (IO.STRING, {"default": ""}),
+                    "field_name": (IO.STRING, {"default": ""}),
+                    "value_suffix": (IO.STRING, {"default": ""}),
                     },
                 "optional": {
                     cls.NODE_INPUT_NAME: (IO.ANY, {}),
+                    cls.COMBO_INPUT_NAME: (IO.COMBO, {"default": ""}),
                 },
                 "hidden": {
                     "prompt": "PROMPT", 
@@ -53,32 +65,44 @@ class GetWorkflowData(WorkFlowData):
                 }
 
 
-    def get_data(self, field_name: str, 
+    def get_data(self, value_prefix:str, field_name:str, value_suffix:str,
                  prompt: dict, extra_pnginfo: dict, unique_id: str,
-                 node: Any | None = None
-                 ) -> tuple[str, str, int, float]:
-        
-        if node is None:
-            return json.dumps(obj=extra_pnginfo), "", 0, 0.0,
+                 node: Any | None = None,
+                 combo: str | None = None,
+                 ) -> tuple[str, str, int, float, str]:
+
 
         this_node_data = prompt[unique_id]
-        prev_node_id = this_node_data["inputs"][self.NODE_INPUT_NAME][0]
-        prev_node = prompt[prev_node_id]
-        print(f"GetWorkflowData: Parent node data = {prev_node}")
+
+        n = node is not None
+        c = combo is not None
+
+        if n and c:
+            print(f"GetWorkflowData: Notice: {self.COMBO_INPUT_NAME} input is ignored if the {self.NODE_INPUT_NAME} input is connected.")
+
+        if n:
+            prev_node_id = this_node_data["inputs"][self.NODE_INPUT_NAME][0]
+            prev_node_data = prompt[prev_node_id]
+            node_data = json.dumps(prev_node_data)
+            print(f"GetWorkflowData: Node data = {node_data}")
+            try:
+                field_value = self.get_nested_value(data=prev_node_data, keys=field_name) if field_name else node_data
+            except KeyError:
+                raise KeyError(f"Error: field name <{field_name}> not found in the parent node ({prev_node_data})")
+        elif c:
+            field_value = node_data = combo
+        else:
+            return (json.dumps(obj=extra_pnginfo), "", 0, 0.0, "")
 
         try:
-            field_value = self.get_nested_value(data=prev_node, keys=field_name) if field_name else ""
-        except KeyError:
-            raise KeyError(f"Error: field name <{field_name}> not found in the parent node ({prev_node})")
-
-        try:
+            field_value = f"{value_prefix}{str(field_value)}{value_suffix}"
             value_float: float = float(field_value)
             value_int: int = int(field_value)
         except (ValueError, TypeError):
             value_int = 0
             value_float = 0.0
 
-        return json.dumps(obj=extra_pnginfo), str(object=field_value), value_int, value_float,
+        return (json.dumps(extra_pnginfo), field_value, value_int, value_float, node_data)
 
 
 class GetGenerationData(WorkFlowData):
@@ -123,5 +147,6 @@ class GetGenerationData(WorkFlowData):
 
 
 if __name__ == "__main__":
+    # find obvious errors
     GetWorkflowData()
     GetGenerationData()
