@@ -61,11 +61,12 @@ class PasteImage(ComfyNodeABC):
     @classmethod
     def IS_CHANGED(cls, alt_image: torch.Tensor | None = None) -> str:
         # nessesary for the change in the clipboard to be recognized by ConfyUI
-        # cls.hash: HASH = md5()
+        changed = False
         for img in cls.GetPILImageFromClipboard():
-            if cls.hash.digest().hex() != md5().digest().hex():
+            if not changed:
                 cls.hash = md5()
             cls.hash.update(img.tobytes())
+            changed = True
         return cls.hash.digest().hex()
 
     def paste(self, alt_image: torch.Tensor | None = None) -> tuple[torch.Tensor, torch.Tensor]:
