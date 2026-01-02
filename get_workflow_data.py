@@ -35,14 +35,13 @@ class GetWorkflowData(WorkFlowData):
     FUNCTION = "get_data"
     CATEGORY = "Hangover"
     NODE_INPUT_NAME = "node"
-    COMBO_INPUT_NAME = "combo"
+
 
     DESCRIPTION = f"""
         This node extracts data from the node that is
-        connected to the {NODE_INPUT_NAME} or {COMBO_INPUT_NAME} input.
+        connected to the {NODE_INPUT_NAME} input.
         The field_value output is concatenated with
         value_prefix + field_value_str + value_suffix.
-        If the {COMBO_INPUT_NAME} input is used, the <field_name> is ignored.
     """
 
 
@@ -55,7 +54,6 @@ class GetWorkflowData(WorkFlowData):
                     },
                 "optional": {
                     cls.NODE_INPUT_NAME: (IO.ANY, {}),
-                    cls.COMBO_INPUT_NAME: (IO.COMBO, {"default": ""}),
                 },
                 "hidden": {
                     "prompt": "PROMPT", 
@@ -68,44 +66,38 @@ class GetWorkflowData(WorkFlowData):
     def get_data(self, value_prefix:str, field_name:str, value_suffix:str,
                  prompt: dict, extra_pnginfo: dict, unique_id: str,
                  node: Any | None = None,
-                 combo: str | None = None,
                  ) -> tuple[str, str, int, float, str]:
 
 
         this_node_data = prompt[unique_id]
 
-        n = node is not None
-        c = combo is not None
-
-        if n and c:
-            print(f"GetWorkflowData: Notice: {self.COMBO_INPUT_NAME} input is ignored if the {self.NODE_INPUT_NAME} input is connected.")
-
-        if n:
+        try:
             prev_node_id = this_node_data["inputs"][self.NODE_INPUT_NAME][0]
             prev_node_data = prompt[prev_node_id]
             node_data = json.dumps(prev_node_data)
             print(f"GetWorkflowData: Node data = {node_data}")
-            try:
-                field_value = self.get_nested_value(data=prev_node_data, keys=field_name) if field_name else node_data
-            except KeyError:
-                raise KeyError(f"Error: field name <{field_name}> not found in the parent node ({prev_node_data})")
-        elif c:
-            field_value = node_data = combo
-        else:
-            return (json.dumps(obj=extra_pnginfo), "", 0, 0.0, "")
+        except (KeyError, TypeError):
+            return (json.dumps(extra_pnginfo), "", 0, 0.0, "")
 
         try:
-            field_value = f"{value_prefix}{str(field_value)}{value_suffix}"
+            field_value = self.get_nested_value(data=prev_node_data, keys=field_name) if field_name else node_data
+        except KeyError:
+            raise KeyError(f"Error: field name <{field_name}> not found in the parent node ({prev_node_data})")
+
+        try:
             value_float: float = float(field_value)
             value_int: int = int(field_value)
         except (ValueError, TypeError):
             value_int = 0
             value_float = 0.0
 
+        field_value = f"{value_prefix}{str(field_value)}{value_suffix}"
+
         return (json.dumps(extra_pnginfo), field_value, value_int, value_float, node_data)
 
 
 class GetGenerationData(WorkFlowData):
+    """Unpublished and untested"""
     RETURN_NAMES = "int_seed", "int_steps", "float_cfg", "float_denoise", "int_batch_size", "str_seed", "str_steps", "str_cfg", "str_denoise", "str_batch_size", "sampler", "scheduler",
     RETURN_TYPES = IO.INT, IO.INT, IO.FLOAT, IO.FLOAT, IO.INT, IO.STRING, IO.STRING, IO.STRING, IO.STRING, IO.STRING, IO.STRING, IO.STRING,
     FUNCTION = "get_data"
@@ -145,8 +137,3 @@ class GetGenerationData(WorkFlowData):
                 str(seed), str(steps), f"{cfg_scale:.2f}", f"{denoise:.2f}", str(batch_size), 
                 sampler_name, scheduler_name,)
 
-
-if __name__ == "__main__":
-    # find obvious errors
-    GetWorkflowData()
-    GetGenerationData()
