@@ -55,8 +55,10 @@ class PasteImage(ComfyNodeABC):
     def INPUT_TYPES(cls) -> InputTypeDict:
         return {"optional": {
                    "alt_image": (IO.IMAGE, {}),
+                   "alt_mask": (IO.MASK, {}),
                    },
                 }
+
 
     @classmethod
     def IS_CHANGED(cls, alt_image: torch.Tensor | None = None) -> str:
@@ -68,8 +70,9 @@ class PasteImage(ComfyNodeABC):
             cls.hash.update(img.tobytes())
             changed = True
         return cls.hash.digest().hex()
+    
 
-    def paste(self, alt_image: torch.Tensor | None = None) -> tuple[torch.Tensor, torch.Tensor]:
+    def paste(self, alt_image: torch.Tensor | None = None, alt_mask: torch.Tensor | None = None) -> tuple[torch.Tensor, torch.Tensor]:
         samples: torch.Tensor | None = None
         mask: torch.Tensor | None = None
 
