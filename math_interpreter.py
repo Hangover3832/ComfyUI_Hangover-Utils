@@ -3,80 +3,82 @@
 @title: ComfyUI-Hangover-Sympy_Interpreter
 @nickname: Hangover-Sympy_Interpreter
 @description: A mathematic expression interpreter based on the sympy library
+
+V3 node with io.Autogrow for dynamically growing numeric inputs (a, b, c, …).
 """
-from sympy.parsing.sympy_parser import parse_expr
 import math
-from typing import Any
-from comfy.comfy_types.node_typing import ComfyNodeABC, IO, InputTypeDict
+import string
+
+from sympy.parsing.sympy_parser import parse_expr
+from typing_extensions import override
+
+from comfy_api.latest import ComfyExtension, io
 
 
-class Sympy_Interpreter(ComfyNodeABC):
+class SympyInterpreter(io.ComfyNode):
+    """Mathematical expression interpreter based on SymPy.
 
-    RETURN_TYPES = IO.INT, IO.FLOAT, IO.STRING,
-    RETURN_NAMES = "int_A", "float_A", "str_A",
-    FUNCTION = "calc"
-    DESCRIPTION = """A powerful mathematical interpreter based on the sympy library"""
-    CATEGORY = "Hangover"
-
-    Config = {
-        "num_vars": 6,
-    }
-
-
-    # Define the input variables dictionary:
-    Input_Vars: list[str] = [chr(c + ord("a")) for c in range(Config["num_vars"])]
-    Variables: dict[str, tuple] = {key: (IO.NUMBER,) for key in Input_Vars}
+    Allows adding unlimited inputs at runtime via the Autogrow mechanism.
+    Ports are automatically named a, b, c, … (lowercase letters).
+    """
 
     @classmethod
-    def INPUT_TYPES(cls) -> InputTypeDict:
-        return {
-            "required": {
-                "expression": (IO.STRING, {"multiline": False, "default": "0"},),
-            },
-            "optional" : cls.Variables,
-        }
+    def define_schema(cls) -> io.Schema:
+        autogrow = io.Autogrow.TemplateNames(
+            input=io.MultiType.Input("value", [io.Float, io.Int]),
+            names=list(string.ascii_lowercase),  # a, b, c, d, …
+            min=0,
+        )
+        return io.Schema(
+            node_id="SympyInterpreter",
+            display_name="Sympy Interpreter",
+            description="Mathematical expression interpreter based on SymPy",
+            category="Hangover",
+            search_aliases=[
+                "sympy", "math", "interpreter", "expression",
+                "form", "calculate", "evaluate",
+            ],
+            inputs=[
+                io.String.Input(
+                    "expression",
+                    default="a",
+                    multiline=True,
+                ),
+                io.Autogrow.Input("values", template=autogrow),
+            ],
+            outputs=[
+                io.Int.Output(display_name="int_A"),
+                io.Float.Output(display_name="float_A"),
+                io.String.Output(display_name="str_A"),
+            ],
+        )
 
-    
-    def calc(self, expression: str, **kwargs: Any) -> tuple[int, float, str]:
-        """ Evaluate the expression and return the results.  """
-        
-        print(f"Math_Interpreter: evaluating expression A({expression})")
-        expr_A = parse_expr(s=expression, local_dict=kwargs)
-        try:
-            result_A = float(expr_A)
-        except TypeError:
-            result_A = 0.0
+    @classmethod
+    def execute(
+        cls, expression: str, values: io.Autogrow.Type
+    ) -> io.NodeOutput:
+        """Evaluate the expression and return the results."""
+        if not expression.strip():
+            raise ValueError("Expression cannot be empty.")
 
-        return (
+        # Gather dynamic ports as dict (a, b, c, …)
+        variables: dict = dict(values)
+
+        print(f"Math_Interpreter: evaluating expression '{expression}'")
+        print(f"  Variables: {variables}")
+
+        expr_A = parse_expr(s=expression, local_dict=variables)
+
+        result_A = float(expr_A)
+
+        return io.NodeOutput(
             math.floor(result_A),
             result_A,
             str(expr_A),
         )
 
 
-def selfTest() -> None:
-    from random import random
-
-    sympy: Sympy_Interpreter = Sympy_Interpreter()
-    try:
-        print(f"{sympy.INPUT_TYPES()=}")
-        print(f"{sympy.RETURN_TYPES=}")
-        print(f"{sympy.RETURN_NAMES=}")
-        print(f"{sympy.Input_Vars=}")
-        print(f"{sympy.Variables=}")
-        variables = {key: random() for key in sympy.Input_Vars}
-        print(f"{variables=}")
-        expression = f"{sympy.Input_Vars[0]}"
-        for v in sympy.Input_Vars[1:-1]:
-            expression += f"+{v}"
-        res_int, res_flt, res_str = sympy.calc(expression=expression, **variables)
-        print(f"{res_int=}, {res_flt=}, {res_str=}")
-        print(f"{type(res_int)=}, {type(res_flt)=}, {type(res_str)=}")
-        print("Tests sucess")
-    except:
-        print("Tests failed")
-        raise
-
-
-if __name__ == "__main__":
-    selfTest()
+class MathExtension(ComfyExtension):
+    @override
+    async def get_node_list(self) -> list[type[io.ComfyNode]]:
+        return [SympyInterpreter]
