@@ -10,6 +10,7 @@ import torch
 import numpy as np
 from PIL import ImageGrab, Image, UnidentifiedImageError
 from hashlib import md5
+from _hashlib import HASH
 
 import pillow_avif  # this adds avif support to Pillow
 
@@ -20,7 +21,7 @@ class PasteImage(io.ComfyNode):
     @classmethod
     def define_schema(cls) -> io.Schema:
         return io.Schema(
-            node_id="HangoverUtils_ClipboardPaste",
+            node_id="Clipboard Paste",
             display_name="Clipboard Paste",
             category="Hangover",
             description="Paste images from the clipboard. Multiple images of the same size are batched.",
@@ -35,7 +36,7 @@ class PasteImage(io.ComfyNode):
             ],
         )
 
-    hash: md5 = md5()
+    hash: HASH = md5()
 
     @classmethod
     def _get_pil_images(cls) -> Generator[Image.Image, None, None]:
@@ -120,10 +121,10 @@ class PasteImage(io.ComfyNode):
 
 
 # --- Legacy V1 shim kept so old loader paths don't break ---
-INPUT_TYPES = lambda: {"optional": {"alt_image": ("IMAGE", {}), "alt_mask": ("MASK", {})}}
-RETURN_TYPES = ("IMAGE", "MASK")
-FUNCTION = "execute"
-CATEGORY = "Hangover"
+#INPUT_TYPES = lambda: {"optional": {"alt_image": ("IMAGE", {}), "alt_mask": ("MASK", {})}}
+#RETURN_TYPES = ("IMAGE", "MASK")
+#FUNCTION = "execute"
+#CATEGORY = "Hangover"
 
 
 def run_test() -> None:
