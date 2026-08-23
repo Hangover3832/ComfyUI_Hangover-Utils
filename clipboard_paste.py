@@ -19,8 +19,9 @@ class PasteImage(ComfyNodeABC):
     FUNCTION = "paste"
     CATEGORY = "Hangover"
     DESCRIPTION = """
-        This node pastes the image from the clipboard.
-        The alt_image input is not processed by the node,
+        # Paste Image
+        This node pastes images from the clipboard.
+        The alt_image and alt_mask input is not processed by the node,
         it just gets passed through in case this node is bypassed.
         Muliple images in the clipboard are batched
         if they have the same size and format.
@@ -38,13 +39,17 @@ class PasteImage(ComfyNodeABC):
                 return
             
             if isinstance(clip, list):
-                    for img in clip:
-                        try:
-                            yield Image.open(fp=img)
-                        except FileNotFoundError:
-                            pass
-            elif isinstance(clip, Image.Image):
-                yield Image.frombytes(mode=clip.mode, size=clip.size, data=clip.tobytes())
+                for img in clip:
+                    try:
+                        yield Image.open(fp=img)
+                    except FileNotFoundError:
+                        pass
+                return
+
+            if isinstance(clip, Image.Image):
+                yield clip.copy() # Image.frombytes(mode=clip.mode, size=clip.size, data=clip.tobytes())
+                return
+
         except:
             pass
         finally:
@@ -61,9 +66,9 @@ class PasteImage(ComfyNodeABC):
 
 
     @classmethod
-    def IS_CHANGED(cls, alt_image: torch.Tensor | None = None) -> str:
+    def IS_CHANGED(cls, alt_image: torch.Tensor | None = None, alt_mask: torch.Tensor | None = None) -> str:
         # nessesary for the change in the clipboard to be recognized by ConfyUI
-        changed = False
+        changed: bool = False
         for img in cls.GetPILImageFromClipboard():
             if not changed:
                 cls.hash = md5()
@@ -78,12 +83,12 @@ class PasteImage(ComfyNodeABC):
 
         for image in self.GetPILImageFromClipboard():
             if image.mode == 'I':
-                image = image.point(lambda i: i/255)
+                image = image.point(lambda i: i/255.)
 
             """
             convert the image to a tensor and add a batch dimension.
-            since image.convert() throws an anoing warning to console if a palette image with transparency
-            is converted with "RGB", so we alway convert to RGBA and trow away the extra channel in the tensor.
+            Since image.convert() throws an anoing warning to the console if a palette image with transparency
+            is converted with "RGB", we always convert to RGBA and trow away the extra channel in the tensor.
             """
             s: torch.Tensor = torch.from_numpy(
                         np.array(object=image.convert(mode="RGBA", )
@@ -94,23 +99,25 @@ class PasteImage(ComfyNodeABC):
             if 'A' in image.getbands():
                 m: torch.Tensor = 1.0 - torch.from_numpy(
                     np.array(image.getchannel(channel='A')
-                    ).astype(dtype=np.float32) / 255.0)[None,]
+                    ).astype(dtype=np.float32) / 255.)[None,]
             elif 'P' in image.mode and 'transparency' in image.info:
-                m = 1.0 - torch.from_numpy(
+                m: torch.Tensor = 1.0 - torch.from_numpy(
                     np.array(image.convert(mode='RGBA').getchannel(channel='A')
                     ).astype(dtype=np.float32) / 255.0)[None,]
             else:
-                m = torch.zeros(size=(1, 64, 64))
+                m: torch.Tensor = torch.zeros(size=(1, 64, 64)) # use a default empty mask
 
             try:
                 if samples is None:
                     samples = s
                 else:
                     samples = torch.cat(tensors=(samples, s), dim=0)
+
                 if mask is None:
                     mask = m
                 else:
                     mask = torch.cat(tensors=(mask, m), dim=0)
+
             except RuntimeError as e:
                 raise RuntimeError(f"Pasting multiple images of different shape is not supported:\n{e}")
  
