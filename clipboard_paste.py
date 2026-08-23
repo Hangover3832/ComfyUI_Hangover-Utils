@@ -3,31 +3,39 @@
 @title: ComfyUI-Hangover-Clipboard_Paste
 @nickname: Clipboard_Paste
 @description: Automatic paste the image from the clipboard
+
+V3 node.
 """
-from _hashlib import HASH
 from typing import Generator
 import torch
 import numpy as np
 from PIL import ImageGrab, Image, UnidentifiedImageError
 from hashlib import md5
 import pillow_avif # this adds avif support to Pillow
-from comfy.comfy_types.node_typing import IO, InputTypeDict, ComfyNodeABC
+from comfy_api.latest import io
 
 
-class PasteImage(ComfyNodeABC):
-    RETURN_TYPES: tuple[IO, IO] = IO.IMAGE, IO.MASK,
-    FUNCTION = "paste"
-    CATEGORY = "Hangover"
-    DESCRIPTION = """
-        # Paste Image
-        This node pastes images from the clipboard.
-        The alt_image and alt_mask input is not processed by the node,
-        it just gets passed through in case this node is bypassed.
-        Muliple images in the clipboard are batched
-        if they have the same size and format.
-        """
-    
-    hash: HASH = md5()
+class PasteImage(io.ComfyNode):
+    @classmethod
+    def define_schema(cls) -> io.Schema:
+        return io.Schema(
+            node_id="Image Clipboard Paster",
+            display_name="Image Clipboard Paster",
+            category="Hangover",
+            description="Pastes images from the clipboard. "
+                        "The alt_image and alt_mask inputs are not processed by the node, "
+                        "they just get passed through in case this node is bypassed. "
+                        "Multiple images in the clipboard are batched if they have the same size and format.",
+            search_aliases=["paste", "clipboard", "clipboard paster"],
+            inputs=[
+                io.Image.Input("alt_image", optional=True),
+                io.Mask.Input("alt_mask", optional=True),
+            ],
+            outputs=[
+                io.Image.Output(),
+                io.Mask.Output(),
+            ],
+        )
 
     @classmethod
     def GetPILImageFromClipboard(cls) -> Generator[Image.Image, None, None]:
@@ -37,7 +45,7 @@ class PasteImage(ComfyNodeABC):
             clip: Image.Image | list[str] | None = ImageGrab.grabclipboard()
             if clip is None:
                 return
-            
+
             if isinstance(clip, list):
                 for img in clip:
                     try:
@@ -57,31 +65,20 @@ class PasteImage(ComfyNodeABC):
 
 
     @classmethod
-    def INPUT_TYPES(cls) -> InputTypeDict:
-        return {"optional": {
-                   "alt_image": (IO.IMAGE, {}),
-                   "alt_mask": (IO.MASK, {}),
-                   },
-                }
+    def fingerprint_inputs(cls, **kwargs) -> str:
+        # necessary for a change in the clipboard to be recognized by ComfyUI
+        hash_md5 = md5()
+        for img in cls.GetPILImageFromClipboard():
+            hash_md5.update(img.tobytes())
+        return hash_md5.digest().hex()
 
 
     @classmethod
-    def IS_CHANGED(cls, alt_image: torch.Tensor | None = None, alt_mask: torch.Tensor | None = None) -> str:
-        # nessesary for the change in the clipboard to be recognized by ConfyUI
-        changed: bool = False
-        for img in cls.GetPILImageFromClipboard():
-            if not changed:
-                cls.hash = md5()
-            cls.hash.update(img.tobytes())
-            changed = True
-        return cls.hash.digest().hex()
-    
-
-    def paste(self, alt_image: torch.Tensor | None = None, alt_mask: torch.Tensor | None = None) -> tuple[torch.Tensor, torch.Tensor]:
+    def execute(cls, *, alt_image: torch.Tensor | None = None, alt_mask: torch.Tensor | None = None, **kwargs) -> io.NodeOutput:
         samples: torch.Tensor | None = None
         mask: torch.Tensor | None = None
 
-        for image in self.GetPILImageFromClipboard():
+        for image in cls.GetPILImageFromClipboard():
             if image.mode == 'I':
                 image = image.point(lambda i: i/255.)
 
@@ -120,34 +117,33 @@ class PasteImage(ComfyNodeABC):
 
             except RuntimeError as e:
                 raise RuntimeError(f"Pasting multiple images of different shape is not supported:\n{e}")
- 
-        if samples is None or mask is None:
-            raise UnidentifiedImageError("Clipboard does not conain valid image(s)!")
 
-        return (samples, mask)
+        if samples is None or mask is None:
+            raise UnidentifiedImageError("Clipboard does not contain valid image(s)!")
+
+        return io.NodeOutput(samples, mask)
 
 
 def run_test() -> None:
     from time import sleep
 
     print(f"{PasteImage.INPUT_TYPES()=}")
-    clp_paste = PasteImage()
     old_sha = ""
 
     while True:
         print("Listen for change...")
-        while (new_sha := clp_paste.IS_CHANGED()) == old_sha:
+        while (new_sha := PasteImage.fingerprint_inputs()) == old_sha:
             print(new_sha, end='\r', flush=True)
             sleep(0.1)
 
         print(f"\n{new_sha}")
-        old_sha = clp_paste.IS_CHANGED()
+        old_sha = PasteImage.fingerprint_inputs()
 
         try:
-            for img in clp_paste.GetPILImageFromClipboard():
+            for img in PasteImage.GetPILImageFromClipboard():
                 print(img) #.show()
 
-            tensor, mask = clp_paste.paste()
+            tensor, mask = PasteImage.execute().args
             if tensor is None:
                 print("No image")
             else:
@@ -162,7 +158,7 @@ def run_test() -> None:
             print("Clipboard does not contain image(s)")
         except:
             raise
-        
+
         sleep(0.1)
 
 if __name__ == "__main__":
