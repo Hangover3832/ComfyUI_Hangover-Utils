@@ -21,7 +21,7 @@ class PasteImage(io.ComfyNode):
     @classmethod
     def define_schema(cls) -> io.Schema:
         return io.Schema(
-            node_id="Clipboard Paste",
+            node_id="ClipboardPaste",
             display_name="Clipboard Paste",
             category="Hangover",
             description="Paste images from the clipboard. Multiple images of the same size are batched.",
@@ -81,6 +81,7 @@ class PasteImage(io.ComfyNode):
         alt_mask: torch.Tensor | None = None,
         **kwargs
     ) -> io.NodeOutput:
+
         samples: torch.Tensor | None = None
         mask: torch.Tensor | None = None
 
@@ -120,17 +121,11 @@ class PasteImage(io.ComfyNode):
         return io.NodeOutput((samples, mask))
 
 
-# --- Legacy V1 shim kept so old loader paths don't break ---
-#INPUT_TYPES = lambda: {"optional": {"alt_image": ("IMAGE", {}), "alt_mask": ("MASK", {})}}
-#RETURN_TYPES = ("IMAGE", "MASK")
-#FUNCTION = "execute"
-#CATEGORY = "Hangover"
-
 
 def run_test() -> None:
     from time import sleep
 
-    clp_paste = PasteImage()
+    clp_paste = ClipboardPaste()
     old_sha = ""
 
     while True:
@@ -146,7 +141,7 @@ def run_test() -> None:
             for img in clp_paste._get_pil_images():
                 print(img)
 
-            tensor, mask = clp_paste.execute()
+            tensor, mask = clp_paste.execute().args[0]
             if tensor is None:
                 print("No image")
             else:
