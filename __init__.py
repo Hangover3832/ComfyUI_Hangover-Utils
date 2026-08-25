@@ -67,3 +67,5 @@ try:
 except NotImplementedError as e:
     print("Save Image w/o Metadata: Error importing 'pyperclipimg' module. Copy to clipboard is not abailable.")
     print(e)
+
+WEB_DIRECTORY = "./web"
