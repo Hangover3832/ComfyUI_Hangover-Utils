@@ -8,11 +8,12 @@ V3 node.
 """
 import functools
 import json
+from typing import Any
 
 from comfy_api.latest import io
 
 
-def get_nested_value(data, keys):
+def get_nested_value(data, keys) -> Any | None:
     """Navigate `data` along a dotted key path ('inputs.text'), raising KeyError if a key is missing."""
 
     def pass_obj(obj, key):
@@ -60,7 +61,7 @@ class GetWorkflowData(io.ComfyNode):
         )
 
     @classmethod
-    def execute(cls, *, value_prefix="", field_name="", value_suffix="", node=None, **kwargs):
+    def execute(cls, *, value_prefix="", field_name="", value_suffix="", node=None, **kwargs) -> io.NodeOutput:
         this_node_data = cls.hidden.prompt[cls.hidden.unique_id]
         try:
             prev_node_id = this_node_data["inputs"]["node"][0]
@@ -75,8 +76,8 @@ class GetWorkflowData(io.ComfyNode):
             raise KeyError(f"Error: field name <{field_name}> not found in the parent node ({prev_node_data})")
 
         try:
-            value_float = float(field_value)
-            value_int = int(field_value)
+            value_float = float(field_value) if field_value else 0.
+            value_int = int(field_value) if field_value else 0
         except (ValueError, TypeError):
             value_int = 0
             value_float = 0.0
