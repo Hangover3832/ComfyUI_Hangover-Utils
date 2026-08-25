@@ -43,7 +43,7 @@ async def comfy_entrypoint() -> HangoverUtils:
 """
 
 # V1 nodes are registered via NODE_CLASS_MAPPINGS.
-# V3 nodes (SympyInterpreter, ImageScaleBoundingBox) are also added here because
+# V3 nodes are also added here because
 # ComfyUI's V3 loader (elif branch) only activates when NODE_CLASS_MAPPINGS is
 # absent. Therefore we register the V3 nodes manually in NODE_CLASS_MAPPINGS.
 NODE_CLASS_MAPPINGS: dict[str, object] = {
