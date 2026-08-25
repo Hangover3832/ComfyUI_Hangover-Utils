@@ -1,13 +1,13 @@
 import re
-from comfy.comfy_types.node_typing import IO, InputTypeDict, ComfyNodeABC
-from folder_paths import models_dir, get_folder_paths, add_model_folder_path, get_filename_list, get_full_path, filter_files_extensions
-from typing import Literal
-from pathlib import Path
 import random
-import pyperclip
 import sys
+import pyperclip
 from hashlib import sha256
 from _hashlib import HASH
+from pathlib import Path
+
+from comfy_api.latest import io
+from folder_paths import models_dir, get_folder_paths, add_model_folder_path, get_filename_list, get_full_path, filter_files_extensions
 
 
 def print_yellow(text: str) -> None:
@@ -64,7 +64,7 @@ class WildcardFileDict(dict[str, list[Path]]):
                 result += f"  -{value}\n"
         return result
 
-    def print_warning(self) -> None: 
+    def print_warning(self) -> None:
         print_yellow(f"Warning: Text Encode Wildcards: No fildcards files could be found in '{self.root_folders}'")
 
     def _get_items(self, key_word: str) -> list[Path]:
@@ -113,19 +113,7 @@ class WildcardFileDict(dict[str, list[Path]]):
         return list(self.keys())
 
 
-class TextEncodeWildcards(ComfyNodeABC):
-
-    CATEGORY = "Hangover"
-    DESCRIPTION = """
-        A very simple and basic {wildcard} style replacement text input box.
-        Ensure that wildcard files are stored in the 'comfyui/models/wildcards' folder
-        or any of its subfolder. The wildrard can also be a folder name, in which case
-        a random file will be choosen.
-    """
-
-    RETURN_TYPES: tuple[IO] = IO.STRING,
-    RETURN_NAMES: tuple[str] = "string",
-    FUNCTION = "encode"
+class TextEncodeWildcards(io.ComfyNode):
     WILDCARD_EXTENSIONS: list[str] = [".txt"]
 
     # preload a list of all .txt files in the wildcards folder
@@ -137,27 +125,38 @@ class TextEncodeWildcards(ComfyNodeABC):
 
     Wildcards_File_Dict: WildcardFileDict = WildcardFileDict(folder_name="wildcards", extensions=WILDCARD_EXTENSIONS)
 
+    @classmethod
+    def define_schema(cls) -> io.Schema:
+        return io.Schema(
+            node_id="Text Encode Wildcards",
+            display_name="Text Encode Wildcards",
+            category="Hangover",
+            description=(
+                "A very simple and basic {wildcard} style replacement text input box.\n"
+                "Ensure that wildcard files are stored in the 'comfyui/models/wildcards' folder\n"
+                "or any of its subfolder. The wildrard can also be a folder name, in which case\n"
+                "a random file will be choosen."
+            ),
+            inputs=[
+                io.String.Input("prompt", default="", multiline=True, placeholder="input prompt"),
+                io.Int.Input("seed", min=0, max=sys.maxsize, control_after_generate=True),
+                io.Boolean.Input("prompt_from_clipboard", default=False),
+                io.Boolean.Input("recurive_search", default=False),
+                io.Combo.Input("wildcards", options=list(cls.Wildcards_File_Dict.keys()), default="wildcards..."),
+            ],
+            outputs=[
+                io.String.Output("string"),
+            ],
+        )
 
     @classmethod
-    def INPUT_TYPES(cls) -> InputTypeDict:
-        return {
-            "required": {
-                    "prompt": (IO.STRING, {"default": "", "multiline": True, "placeholder": "input prompt"}),
-                    "seed": (IO.INT, {"control_after_generate": True, "min": 0, "max": sys.maxsize}),
-                    "prompt_from_clipboard": (IO.BOOLEAN, {"default": False}),
-                    "recurive_search": (IO.BOOLEAN, {"default": False}),
-                    "wildcards": (IO.COMBO, {"options": list(cls.Wildcards_File_Dict.keys()), "default": "wildcards..."})
-            }
-        }
-
-    @classmethod
-    def VALIDATE_INPUTS(cls, prompt_from_clipboard: bool | None = None) -> str | Literal[True]:
+    def validate_inputs(cls, *, prompt_from_clipboard: bool | None = None, **kwargs) -> bool | str:
         if prompt_from_clipboard and not pyperclip.paste():
             return "Cannot paste, clipboard is empty."
         return True
 
     @classmethod
-    def IS_CHANGED(cls, prompt: str, seed: int, prompt_from_clipboard: bool, recurive_search: bool, wildcards: list[str]) -> str:
+    def fingerprint_inputs(cls, *, prompt_from_clipboard: bool | None = None, **kwargs) -> str:
         sha: HASH = sha256()
         if prompt_from_clipboard:
             sha.update(pyperclip.paste().encode())
@@ -173,14 +172,14 @@ class TextEncodeWildcards(ComfyNodeABC):
                 prompt = prompt.replace(placeholder, text, 1)
         return prompt
 
-
-    def encode(self, prompt: str, seed: int, prompt_from_clipboard: bool, recurive_search: bool, wildcards: list[str]) -> tuple[str]:
+    @classmethod
+    def execute(cls, *, prompt: str = "", seed: int = 0, prompt_from_clipboard: bool = False, recurive_search: bool = False, wildcards: str = "", **kwargs) -> io.NodeOutput:
         if not wildcards:
             print(f"Text Encode Wildcards: Warning: No wildcard files were found.")
-            return prompt,
+            return io.NodeOutput(prompt)
 
         prompt = clp if (clp := pyperclip.paste()) and prompt_from_clipboard else prompt
-        return self.replace_placeholder(prompt=prompt, recursive=recurive_search, seed=seed),
+        return io.NodeOutput(cls().replace_placeholder(prompt=prompt, recursive=recurive_search, seed=seed))
 
 
 def test_dict():
@@ -195,11 +194,11 @@ def run_tests() -> None:
     print(f"{models_dir=}")
     print(f"{get_folder_paths(folder_name="wildcards")=}")
 
-    if not (prompt := pyperclip.paste()):
-        prompt = "{*}"
+    prompt = pyperclip.paste() or "{*}"
 
     for _ in range(10):
         print(encoder.replace_placeholder(prompt=prompt, recursive=True, seed=-1))
+
 
 if __name__ == "__main__":
     test_dict()
