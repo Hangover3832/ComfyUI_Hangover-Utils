@@ -7,6 +7,7 @@ import random
 import pyperclip
 import sys
 from hashlib import sha256
+from _hashlib import HASH
 
 
 def print_yellow(text: str) -> None:
@@ -157,7 +158,7 @@ class TextEncodeWildcards(ComfyNodeABC):
 
     @classmethod
     def IS_CHANGED(cls, prompt: str, seed: int, prompt_from_clipboard: bool, recurive_search: bool, wildcards: list[str]) -> str:
-        sha = sha256()
+        sha: HASH = sha256()
         if prompt_from_clipboard:
             sha.update(pyperclip.paste().encode())
         return sha.digest().hex()
