@@ -7,10 +7,10 @@
 import folder_paths
 import comfy.sd
 from comfy.model_patcher import ModelPatcher
-from comfy.comfy_types.node_typing import IO, ComfyNodeABC, InputTypeDict
+from comfy_api.latest import io
 
 
-class MakeInpaintModel(ComfyNodeABC):
+class MakeInpaintModel(io.ComfyNode):
     V1_5_PRUNED: str = "Please select the original SD 1.5 pruned model"
     V1_5_INPAINT: str = "Please select the original SD 1.5 inpaint model"
     ckpts: list[str] = folder_paths.get_filename_list(folder_name="checkpoints")
@@ -20,26 +20,28 @@ class MakeInpaintModel(ComfyNodeABC):
         if "v1-5-inpainting." in f.lower():
             V1_5_INPAINT = f
 
+    @classmethod
+    def define_schema(cls) -> io.Schema:
+        return io.Schema(
+            node_id="Make Inpaint Model",
+            display_name="Make Inpaint Model",
+            category="Hangover",
+            description="Easy make an inpaint version of any model on the fly.",
+            inputs=[
+                io.Model.Input("model"),
+                io.Combo.Input("sd1_5_pruned", options=list(cls.ckpts), default=cls.V1_5_PRUNED),
+                io.Combo.Input("sd1_5_inpaint", options=list(cls.ckpts), default=cls.V1_5_INPAINT),
+            ],
+            outputs=[
+                io.Model.Output(),
+            ],
+        )
 
     @classmethod
-    def INPUT_TYPES(cls) -> InputTypeDict:
-        return {"required": {
-                    "model": (IO.MODEL, {}),
-                    "sd1_5_pruned": (IO.COMBO, {"options": list(cls.ckpts), "default": cls.V1_5_PRUNED}),
-                    "sd1_5_inpaint": (IO.COMBO, {"options": list(cls.ckpts), "default": cls.V1_5_INPAINT})
-                    }
-                }
-
-
-    RETURN_TYPES = IO.MODEL,
-    FUNCTION = "merge"
-    CATEGORY = "Hangover"
-
-
-    def merge(self, model: ModelPatcher, sd1_5_pruned: str, sd1_5_inpaint: str) -> tuple[ModelPatcher | None]:
+    def execute(cls, *, model: ModelPatcher, sd1_5_pruned: str, sd1_5_inpaint: str, **kwargs) -> io.NodeOutput:
 
         '''
-        add difference: result =  (sd1_5_inpaint - sd1_5_pruned) + model 
+        add difference: result =  (sd1_5_inpaint - sd1_5_pruned) + model
         '''
         ckpt_ip = folder_paths.get_full_path(folder_name="checkpoints", filename=sd1_5_inpaint)
         ckpt_pr = folder_paths.get_full_path(folder_name="checkpoints", filename=sd1_5_pruned)
@@ -57,8 +59,8 @@ class MakeInpaintModel(ComfyNodeABC):
             kp = model.clone().get_key_patches(filter_prefix="diffusion_model.")
             for k in kp:
                 ip.add_patches(patches={k: kp[k]}, strength_patch=1.0, strength_model=1.0) # + model
-            return ip,    
-        return None,
+            return io.NodeOutput(ip)
+        return io.NodeOutput(None)
 
 
 def run_test() -> None:
@@ -69,7 +71,7 @@ def run_test() -> None:
     pruned_model = ipm.V1_5_PRUNED
     print(f"{inpaint_model=}, {pruned_model=}")
     model = CheckpointLoaderSimple().load_checkpoint(ckpt_name=pruned_model)[0]
-    ipm.merge(model=model, sd1_5_pruned=MakeInpaintModel.V1_5_PRUNED, sd1_5_inpaint=MakeInpaintModel.V1_5_INPAINT)
+    MakeInpaintModel.execute(model=model, sd1_5_pruned=MakeInpaintModel.V1_5_PRUNED, sd1_5_inpaint=MakeInpaintModel.V1_5_INPAINT) # type: ignore
     print("Test run succesful")
 
 

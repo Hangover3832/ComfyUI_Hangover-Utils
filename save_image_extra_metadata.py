@@ -3,73 +3,65 @@
 @title: ComfyUI-Hangover-Save_Image
 @nickname: Hangover-Save_Image_Extra_Metadata
 @description: Display, save or not save image, with or without extra metadata.
+V3 node.
 """
-from typing import Any
-from nodes import SaveImage
-import folder_paths
 import random
-from torch import Tensor
-from PIL import Image
+
 import numpy as np
-from comfy.comfy_types.node_typing import IO, InputTypeDict
+from PIL import Image
+from torch import Tensor
+
+from comfy_api.latest import io, ui
 
 
-class SaveImage_NoWorkflow(SaveImage):
+class SaveImage_NoWorkflow(io.ComfyNode):
     """
-    Inheritance of ComfyUI's SaveImage class.
-    This node lets choise if the image itself, and/or the workflow get saved within the image.
+    Saves the input images with a choice of whether to embed the workflow and
+    whether to write to the output directory (True) or the temp/preview directory (False).
     """
-
-    def __init__(self) -> None:
-        super().__init__()
-
-    input_types = {"required": 
-                    {"images": ("IMAGE", ), 
-                    "filename_prefix": ("STRING", {"default": "ComfyUI"}),
-                    "save_image": ("BOOLEAN", {"default": True}),
-                    "include_workflow": ("BOOLEAN", {"default": True}),
-                    },
-                }
-    
-    # if pyperclipimg_available:
-    input_types["required"]["copy_to_clipboard"] = ("BOOLEAN", {"default": False})
-
-    input_types["hidden"] = {"prompt": "PROMPT", "extra_pnginfo": "EXTRA_PNGINFO"}
-
 
     @classmethod
-    def INPUT_TYPES(cls) -> InputTypeDict: # type: ignore
-        return {
-            "required": {
-                "images": (IO.IMAGE, {}), 
-                "filename_prefix": (IO.STRING, {"default": "ComfyUI"}),
-                "save_image": (IO.BOOLEAN, {"default": True}),
-                "include_workflow": (IO.BOOLEAN, {"default": True}),
-                "copy_to_clipboard": (IO.BOOLEAN, {"default": False}),
-            },
-            "hidden": {
-                "prompt": "PROMPT", 
-                "extra_pnginfo": "EXTRA_PNGINFO",
-            }
-        }
+    def define_schema(cls) -> io.Schema:
+        return io.Schema(
+            node_id="Save Image w/o Metadata",
+            display_name="Save Image w/o Metadata",
+            category="Hangover",
+            description="Saves the input images, with a choice of whether to embed the workflow "
+                        "and whether to save to the output directory or the temp/preview directory.",
+            search_aliases=["save", "save image", "output image", "export image"],
+            inputs=[
+                io.Image.Input("images", tooltip="The images to save."),
+                io.String.Input(
+                    "filename_prefix",
+                    default="ComfyUI",
+                    tooltip="The prefix for the file to save. This may include formatting information such as %date:yyyy-MM-dd% or %Empty Latent Image.width% to include values from nodes.",
+                ),
+                io.Boolean.Input(
+                    "save_image",
+                    default=True,
+                    tooltip="Save to the ComfyUI output directory (True) or the temp/preview directory (False).",
+                ),
+                io.Boolean.Input(
+                    "include_workflow",
+                    default=True,
+                    tooltip="Embed the workflow/prompt into the saved image metadata.",
+                ),
+                io.Boolean.Input(
+                    "copy_to_clipboard",
+                    default=False,
+                    tooltip="Copy the first image to the clipboard.",
+                ),
+            ],
+            is_output_node=True,
+            outputs=[io.Image.Output(display_name="images")],
+        )
 
+    @classmethod
+    def execute(cls, *, images: Tensor, filename_prefix: str = "ComfyUI",
+                save_image: bool = True, include_workflow: bool = True,
+                copy_to_clipboard: bool = False, **kwargs) -> io.NodeOutput:
 
-    RETURN_TYPES = ()
-    FUNCTION = "save_images"
-    OUTPUT_NODE = True
-    CATEGORY = "Hangover"
-
-
-    def save_images(self, images: Tensor, filename_prefix: str = "ComfyUI", 
-                    prompt: dict | None = None, extra_pnginfo: dict | None = None, 
-                    save_image: bool = True, include_workflow: bool = True, copy_to_clipboard: bool = False
-                    ) -> dict[str, dict[str, list]]:
-        
-        if not include_workflow:
-            extra_pnginfo = None
-            prompt = None
-
-        if copy_to_clipboard: # and pyperclipimg_available:
+        if copy_to_clipboard:
             try:
                 from pyperclipimg import copy
             except NotImplementedError as e:
@@ -85,16 +77,24 @@ class SaveImage_NoWorkflow(SaveImage):
                 print(f"Note: copy batched images to the clipboard is not supported, picking the first one")
 
             img = np.clip(images[0].cpu().numpy() * 255., a_min=0, a_max=255).astype(dtype=np.uint8)
-            copy(image=Image.fromarray(obj=img)) # type: ignore
+            copy(image=Image.fromarray(obj=img))  # type: ignore
 
+        # cls=None makes ImageSaveHelper skip embedding the workflow/prompt metadata.
+        cls_arg = None if not include_workflow else cls
 
         if save_image:
-            self.__init__()
+            saved = ui.ImageSaveHelper.get_save_images_ui(
+                images, filename_prefix=filename_prefix, cls=cls_arg, compress_level=4,
+            )
         else:
-            self.output_dir = folder_paths.get_temp_directory()
-            self.type = "temp"
-            self.prefix_append = "_temp_" + ''.join(random.choice("abcdefghijklmnopqrstupvxyz") for x in range(5))
-            self.compress_level = 1
+            temp_prefix = filename_prefix + "_temp_" + ''.join(
+                random.choice("abcdefghijklmnopqrstupvxyz") for _ in range(5)
+            )
+            saved = ui.SavedImages(
+                ui.ImageSaveHelper.save_images(
+                    images, filename_prefix=temp_prefix, folder_type=io.FolderType.temp,
+                    cls=cls_arg, compress_level=1,
+                )
+            )
 
-        # Save the images using the parent's class method
-        return(super().save_images(images=images, filename_prefix=filename_prefix, prompt=prompt, extra_pnginfo=extra_pnginfo))
+        return io.NodeOutput(images, ui=saved)

@@ -8,11 +8,8 @@ V3 node with io.Autogrow for dynamically growing numeric inputs (a, b, c, …).
 """
 import math
 import string
-
 from sympy.parsing.sympy_parser import parse_expr
-from typing_extensions import override
-
-from comfy_api.latest import ComfyExtension, io
+from comfy_api.latest import io
 
 
 class SympyInterpreter(io.ComfyNode):
@@ -54,9 +51,7 @@ class SympyInterpreter(io.ComfyNode):
         )
 
     @classmethod
-    def execute(
-        cls, expression: str, values: io.Autogrow.Type
-    ) -> io.NodeOutput:
+    def execute(cls, *, expression: str, values: io.Autogrow.Type, **kwargs) -> io.NodeOutput:
         """Evaluate the expression and return the results."""
         if not expression.strip():
             raise ValueError("Expression cannot be empty.")
@@ -76,9 +71,3 @@ class SympyInterpreter(io.ComfyNode):
             result_A,
             str(expr_A),
         )
-
-
-class MathExtension(ComfyExtension):
-    @override
-    async def get_node_list(self) -> list[type[io.ComfyNode]]:
-        return [SympyInterpreter]
