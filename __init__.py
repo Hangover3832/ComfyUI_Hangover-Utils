@@ -11,6 +11,7 @@ from typing_extensions import override
 WEB_DIRECTORY = "./web"
 
 class HangoverUtils(ComfyExtension):
+    """ ComfyUI-Hangover_Utils: A collection of utility nodes for ComfyUI."""
     @override
     async def get_node_list(self) -> list[type[io.ComfyNode]]:
         result = [

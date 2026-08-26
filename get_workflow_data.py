@@ -9,27 +9,11 @@ V3 node.
 import functools
 import json
 from typing import Any
-
 from comfy_api.latest import io
 
 
-def get_nested_value(data, keys) -> Any | None:
-    """Navigate `data` along a dotted key path ('inputs.text'), raising KeyError if a key is missing."""
-
-    def pass_obj(obj, key):
-        if isinstance(obj, dict):
-            return obj[key]
-        if isinstance(obj, (list, tuple)):
-            try:
-                return obj[int(key)]
-            except ValueError:
-                raise ValueError(f"Expected an integer index value for object <{obj}>")
-        return None
-
-    return functools.reduce(pass_obj, keys.split("."), data)
-
-
 class GetWorkflowData(io.ComfyNode):
+    """ Extracts data from the node connected to this node's 'node' input."""
     @classmethod
     def define_schema(cls) -> io.Schema:
         return io.Schema(
@@ -60,6 +44,23 @@ class GetWorkflowData(io.ComfyNode):
             ],
         )
 
+    @staticmethod
+    def get_nested_value(data, keys) -> Any | None:
+        """Navigate `data` along a dotted key path ('inputs.text'), raising KeyError if a key is missing."""
+
+        def pass_obj(obj, key):
+            if isinstance(obj, dict):
+                return obj[key]
+            if isinstance(obj, (list, tuple)):
+                try:
+                    return obj[int(key)]
+                except ValueError:
+                    raise ValueError(f"Expected an integer index value for object <{obj}>")
+            return None
+
+        return functools.reduce(pass_obj, keys.split("."), data)
+
+
     @classmethod
     def execute(cls, *, value_prefix="", field_name="", value_suffix="", node=None, **kwargs) -> io.NodeOutput:
         this_node_data = cls.hidden.prompt[cls.hidden.unique_id]
@@ -71,7 +72,7 @@ class GetWorkflowData(io.ComfyNode):
             return io.NodeOutput(json.dumps(cls.hidden.extra_pnginfo), "", 0, 0.0, "")
 
         try:
-            field_value = get_nested_value(prev_node_data, field_name) if field_name else node_data
+            field_value = cls.get_nested_value(prev_node_data, field_name) if field_name else node_data
         except KeyError:
             raise KeyError(f"Error: field name <{field_name}> not found in the parent node ({prev_node_data})")
 

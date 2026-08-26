@@ -2,7 +2,7 @@
 @author: AlexL
 @title: ComfyUI-Hangover-Make_Inpaint_Model
 @nickname: Hangover-Inpaint_Model
-@description: Easy make an inpaint version of any model on the fly.
+@description: Easy make an inpaint version of any SD1.5 model on the fly.
 """
 import folder_paths
 import comfy.sd
@@ -11,6 +11,8 @@ from comfy_api.latest import io
 
 
 class MakeInpaintModel(io.ComfyNode):
+    """ Make an inpaint version of any SD1.5 model on the fly.
+    """
     V1_5_PRUNED: str = "Please select the original SD 1.5 pruned model"
     V1_5_INPAINT: str = "Please select the original SD 1.5 inpaint model"
     ckpts: list[str] = folder_paths.get_filename_list(folder_name="checkpoints")

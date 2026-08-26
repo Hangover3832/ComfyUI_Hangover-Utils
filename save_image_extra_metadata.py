@@ -2,7 +2,7 @@
 @author: AlexL
 @title: ComfyUI-Hangover-Save_Image
 @nickname: Hangover-Save_Image_Extra_Metadata
-@description: Display, save or not save image, with or without extra metadata.
+@description: Display or not display, save or not save image, with or without extra metadata.
 V3 node.
 """
 import random

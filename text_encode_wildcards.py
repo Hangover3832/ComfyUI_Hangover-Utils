@@ -24,6 +24,7 @@ class WildcardFileDict(dict[str, list[Path]]):
         files: list[str] = filter_files_extensions(files=get_filename_list(folder_name=folder_name),extensions=extensions)
         self.num_files = len(files)
 
+        # populate the dictionary with the wildcard files and folder names
         if files:
             entries: dict[str, list[Path]] = {}
             self['*'] = self.root_folders # add the root path(s) as keyword '{*}'
@@ -52,11 +53,15 @@ class WildcardFileDict(dict[str, list[Path]]):
             self.print_warning()
 
     def __repr__(self) -> str:
+        """ Return a string representation of the WildcardFileDict, including the number of wildcards, number of wildcard files, and size in bytes."""
+
         size = sys.getsizeof(self)
         keys = len(self)
         return f"Wildcards: {len(self)}, wildcard files: {self.num_files}, size: {sys.getsizeof(self)} bytes."
 
     def __str__(self) -> str:
+        """ Return a string representation of the WildcardFileDict, including the keys and their corresponding values."""
+
         result: str = ""
         for key, value in self.items():
             result += f"{key}:\n"
@@ -68,12 +73,14 @@ class WildcardFileDict(dict[str, list[Path]]):
         print_yellow(f"Warning: Text Encode Wildcards: No fildcards files could be found in '{self.root_folders}'")
 
     def _get_items(self, key_word: str) -> list[Path]:
+        """ Return a list of Path objects corresponding to the given key_word. If the key_word is not found, return an empty list."""
         if key_word in self.keys():
             return self[key_word]
         else:
             return []
 
     def _get_random_file(self, key_word: str, recursive: bool, seed: int = -1) -> Path | None:
+        """ Return a random Path object corresponding to the given key_word. If the key_word is not found, return None."""
         if seed >= 0:
             random.seed(seed)
         items = self._get_items(key_word=key_word)
@@ -95,6 +102,7 @@ class WildcardFileDict(dict[str, list[Path]]):
             raise IOError(f"Error reading '{result}'.")
 
     def get_random_entry(self, key_word: str, recursive: bool, seed: int = -1) -> str | None:
+        """ Return a random line from a wildcard file corresponding to the given key_word. If the key_word is not found, return None."""
         if not self:
             self.print_warning()
             return
@@ -110,10 +118,12 @@ class WildcardFileDict(dict[str, list[Path]]):
 
     @property
     def get_keys(self) -> list[str]:
+        """ Return a list of all keys in the WildcardFileDict."""
         return list(self.keys())
 
 
 class TextEncodeWildcards(io.ComfyNode):
+    """ A very simple and basic {wildcard} style replacement text input box."""
     WILDCARD_EXTENSIONS: list[str] = [".txt"]
 
     # preload a list of all .txt files in the wildcards folder
@@ -151,18 +161,25 @@ class TextEncodeWildcards(io.ComfyNode):
 
     @classmethod
     def validate_inputs(cls, *, prompt_from_clipboard: bool | None = None, **kwargs) -> bool | str:
+        """ Validate the inputs for the TextEncodeWildcards node. If prompt_from_clipboard is True, 
+        check if the clipboard is empty and return an error message if it is. Otherwise, return True."""
         if prompt_from_clipboard and not pyperclip.paste():
             return "Cannot paste, clipboard is empty."
         return True
 
     @classmethod
     def fingerprint_inputs(cls, *, prompt_from_clipboard: bool | None = None, **kwargs) -> str:
+        """ Generate a fingerprint for the inputs of the TextEncodeWildcards node. If prompt_from_clipboard is True,"""
         sha: HASH = sha256()
         if prompt_from_clipboard:
             sha.update(pyperclip.paste().encode())
         return sha.digest().hex()
 
     def replace_placeholder(self, prompt: str, recursive: bool, seed: int = -1) -> str:
+        """ Replace all placeholders in the prompt with random entries from the wildcard files. 
+        If recursive is True, search for wildcards in subfolders as well. 
+        If seed is provided, use it to seed the random number generator for reproducibility.
+        """
         if seed >= 0:
             random.seed(a=seed)
 
@@ -174,6 +191,7 @@ class TextEncodeWildcards(io.ComfyNode):
 
     @classmethod
     def execute(cls, *, prompt: str = "", seed: int = 0, prompt_from_clipboard: bool = False, recurive_search: bool = False, wildcards: str = "", **kwargs) -> io.NodeOutput:
+        """ Execute the TextEncodeWildcards node. If prompt_from_clipboard is True, use the text from the clipboard as the prompt."""
         if not wildcards:
             print(f"Text Encode Wildcards: Warning: No wildcard files were found.")
             return io.NodeOutput(prompt)
@@ -183,12 +201,14 @@ class TextEncodeWildcards(io.ComfyNode):
 
 
 def test_dict():
+    """ Test the WildcardFileDict class and print the results."""
     f = TextEncodeWildcards.Wildcards_File_Dict
     print(repr(f))
     print(f)
 
 
 def run_tests() -> None:
+    """ Run a series of tests on the TextEncodeWildcards node."""
     encoder = TextEncodeWildcards()
 
     print(f"{models_dir=}")

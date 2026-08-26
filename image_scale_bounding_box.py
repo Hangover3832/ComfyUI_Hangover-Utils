@@ -17,6 +17,7 @@ class PAD(StrEnum): # Padding Type
 
 
 class ImageScaleBoundingBox(io.ComfyNode):
+    """ Scales an input image into a given box size, whereby the aspect ratio keeps retained."""
     UPSCALE_METHOD: list[str] = ["lanczos", "nearest-exact", "bilinear", "area", "bicubic"]
 
     @classmethod

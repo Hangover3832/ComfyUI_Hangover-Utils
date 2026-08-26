@@ -16,6 +16,7 @@ from comfy_api.latest import io
 
 
 class PasteImage(io.ComfyNode):
+    """ Pastes the image from the clipboard."""
     @classmethod
     def define_schema(cls) -> io.Schema:
         return io.Schema(

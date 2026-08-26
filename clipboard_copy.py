@@ -14,6 +14,9 @@ from comfy_api.latest import io
 
 
 class CopyImage(io.ComfyNode):
+    """ Copy an image to the clipboard.
+    Note that this node is only available if the 'pyperclipimg' module is installed and working on the system.
+    """
     @classmethod
     def define_schema(cls) -> io.Schema:
         return io.Schema(
