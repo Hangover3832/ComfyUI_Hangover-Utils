@@ -6,11 +6,10 @@
 V3 node.
 """
 import random
-
 import numpy as np
+import torch
 from PIL import Image
 from torch import Tensor
-
 from comfy_api.latest import io, ui
 
 
@@ -37,6 +36,11 @@ class SaveImage_NoWorkflow(io.ComfyNode):
                     tooltip="The prefix for the file to save. This may include formatting information such as %date:yyyy-MM-dd% or %Empty Latent Image.width% to include values from nodes.",
                 ),
                 io.Boolean.Input(
+                    "show_image",
+                    default=True,
+                    tooltip="Wether the image is shown or not.",
+                ),
+                io.Boolean.Input(
                     "save_image",
                     default=True,
                     tooltip="Save to the ComfyUI output directory (True) or the temp/preview directory (False).",
@@ -58,7 +62,7 @@ class SaveImage_NoWorkflow(io.ComfyNode):
 
     @classmethod
     def execute(cls, *, images: Tensor, filename_prefix: str = "ComfyUI",
-                save_image: bool = True, include_workflow: bool = True,
+                show_image: bool = True, save_image: bool = True, include_workflow: bool = True,
                 copy_to_clipboard: bool = False, **kwargs) -> io.NodeOutput:
 
         if copy_to_clipboard:
@@ -97,4 +101,4 @@ class SaveImage_NoWorkflow(io.ComfyNode):
                 )
             )
 
-        return io.NodeOutput(images, ui=saved)
+        return io.NodeOutput(images, ui=saved) if show_image else io.NodeOutput(images)
