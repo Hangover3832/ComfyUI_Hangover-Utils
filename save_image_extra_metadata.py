@@ -36,11 +36,6 @@ class SaveImage_NoWorkflow(io.ComfyNode):
                     tooltip="The prefix for the file to save. This may include formatting information such as %date:yyyy-MM-dd% or %Empty Latent Image.width% to include values from nodes.",
                 ),
                 io.Boolean.Input(
-                    "show_image",
-                    default=True,
-                    tooltip="Wether the image is shown or not.",
-                ),
-                io.Boolean.Input(
                     "save_image",
                     default=True,
                     tooltip="Save to the ComfyUI output directory (True) or the temp/preview directory (False).",
@@ -54,6 +49,11 @@ class SaveImage_NoWorkflow(io.ComfyNode):
                     "copy_to_clipboard",
                     default=False,
                     tooltip="Copy the first image to the clipboard.",
+                ),
+                io.Boolean.Input(
+                    "show_image",
+                    default=True,
+                    tooltip="Wether the image is shown or not.",
                 ),
             ],
             is_output_node=True,
