@@ -5,7 +5,7 @@ from .clipboard_paste import PasteImage
 from .text_encode_wildcards import TextEncodeWildcards
 from .get_workflow_data import GetWorkflowData
 from .math_interpreter import SympyInterpreter
-from .string_select import StringSelect
+from .multi_string_concat import MultiStringConcat
 from comfy_api.latest import ComfyExtension, io
 from typing_extensions import override
 
@@ -23,7 +23,7 @@ class HangoverUtils(ComfyExtension):
             SympyInterpreter,
             TextEncodeWildcards,
             GetWorkflowData,
-            StringSelect,
+            MultiStringConcat,
         ]
 
         try:
