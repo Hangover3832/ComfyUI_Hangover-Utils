@@ -6,6 +6,7 @@ from .text_encode_wildcards import TextEncodeWildcards
 from .get_workflow_data import GetWorkflowData
 from .math_interpreter import SympyInterpreter
 from .multi_string_concat import MultiStringConcat
+from .load_image_from_dir import LoadImageIndexFromDir
 from comfy_api.latest import ComfyExtension, io
 from typing_extensions import override
 
@@ -24,6 +25,7 @@ class HangoverUtils(ComfyExtension):
             TextEncodeWildcards,
             GetWorkflowData,
             MultiStringConcat,
+            LoadImageIndexFromDir,
         ]
 
         try:
