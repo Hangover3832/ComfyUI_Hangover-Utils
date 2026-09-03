@@ -16,6 +16,7 @@ class MultiStringConcat(io.ComfyNode):
             node_id="hangover_StringConcat",
             display_name="Hangover Multi String Concatenate",
             category="Hangover",
+            search_aliases=["string", "concatenate", "concat", "mulit"],
             description=(
                 "Concatenates all input strings."
             ),

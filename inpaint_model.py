@@ -29,6 +29,7 @@ class MakeInpaintModel(io.ComfyNode):
             display_name="Make Inpaint Model",
             category="Hangover",
             description="Easy make an inpaint version of any model on the fly.",
+            search_aliases=["inpaint", "model"],
             inputs=[
                 io.Model.Input("model"),
                 io.Combo.Input("sd1_5_pruned", options=list(cls.ckpts), default=cls.V1_5_PRUNED),

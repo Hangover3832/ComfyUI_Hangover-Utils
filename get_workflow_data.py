@@ -20,6 +20,7 @@ class GetWorkflowData(io.ComfyNode):
             node_id="Get Workflow Data",
             display_name="Get Workflow Data",
             category="Hangover",
+            search_aliases=["workflow", "data", "node data", "extract"],
             description=(
                 "This node extracts data from the node connected to the 'node' input.\n"
                 "field_value_str is built from value_prefix + field_value + value_suffix."

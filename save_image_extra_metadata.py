@@ -27,7 +27,7 @@ class SaveImage_NoWorkflow(io.ComfyNode):
             category="Hangover",
             description="Saves the input images, with a choice of whether to embed the workflow "
                         "and whether to save to the output directory or the temp/preview directory.",
-            search_aliases=["save", "save image", "output image", "export image"],
+            search_aliases=["save", "save image", "output image", "export image", "privacy"],
             inputs=[
                 io.Image.Input("images", tooltip="The images to save."),
                 io.String.Input(

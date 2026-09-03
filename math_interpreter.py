@@ -33,7 +33,7 @@ class SympyInterpreter(io.ComfyNode):
             category="Hangover",
             search_aliases=[
                 "sympy", "math", "interpreter", "expression",
-                "form", "calculate", "evaluate",
+                "form", "calculate", "evaluate", "symbolic",
             ],
             inputs=[
                 io.String.Input(

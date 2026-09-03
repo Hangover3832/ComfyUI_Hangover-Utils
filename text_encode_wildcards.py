@@ -141,6 +141,7 @@ class TextEncodeWildcards(io.ComfyNode):
             node_id="Text Encode Wildcards",
             display_name="Text Encode Wildcards",
             category="Hangover",
+            search_aliases=["prompt", "wildcard", "string"],
             description=(
                 "A very simple and basic {wildcard} style replacement text input box.\n"
                 "Ensure that wildcard files are stored in the 'comfyui/models/wildcards' folder\n"
