@@ -6,12 +6,13 @@
 V3 node.
 """
 
-from typing import Callable
+from typing import Any, Callable
 from nodes import MAX_RESOLUTION
 import torch
 import numpy as np
 from pathlib import Path
-from PIL import Image, ImageSequence, ImageOps, UnidentifiedImageError
+from PIL import Image, ImageSequence, ImageOps
+import pillow_avif # this adds avif support to Pillow
 from comfy_api.latest import io
 import node_helpers
 from hashlib import md5
@@ -24,7 +25,7 @@ def load_image_with_mask(image_path: Path) -> tuple[torch.Tensor, torch.Tensor]:
     """Load a PNG/image from an arbitrary path, return (image_tensor, mask_tensor).
 
     Extracts the alpha channel as a mask (inverted: transparent areas → 1).
-    Handles multi-frame images (animated WebP/GIF) by returning all frames batched.
+    Handles multi-frame images (animated WebP/GIF/APNG) by returning all frames batched and avif.
 
     Returns:
         image_tensor: [B, H, W, C] float32 in [0, 1]
@@ -49,7 +50,8 @@ def load_image_with_mask(image_path: Path) -> tuple[torch.Tensor, torch.Tensor]:
                 ).astype(dtype=np.float32) / 255.0
 
         else:
-            mask = np.ones(frame.size, dtype=np.float32)
+            w, h = frame.size
+            mask = np.ones((h,w), dtype=np.float32)
 
         mask = 1.0 - torch.from_numpy(mask)
 
@@ -67,7 +69,7 @@ def load_image_with_mask(image_path: Path) -> tuple[torch.Tensor, torch.Tensor]:
 
 class LoadImageIndexFromDir(io.ComfyNode):
 
-    valid_extensions = {".png", ".jpg", ".jpeg", ".webp", ".avif"}
+    valid_extensions = {".png", ".jpg", ".jpeg", ".webp", ".avif", ".gif"}
 
     @classmethod
     def _list_images(cls, path:Path, recursive:bool) -> tuple[list[Path], str]:
