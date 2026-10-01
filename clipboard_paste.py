@@ -31,6 +31,7 @@ class PasteImage(io.ComfyNode):
             inputs=[
                 io.Image.Input("alt_image", optional=True),
                 io.Mask.Input("alt_mask", optional=True),
+                io.Boolean.Input("source", default=True, label_on="clipboard", label_off="alt_image")
             ],
             outputs=[
                 io.Image.Output(),
@@ -75,7 +76,10 @@ class PasteImage(io.ComfyNode):
 
 
     @classmethod
-    def execute(cls, *, alt_image: torch.Tensor | None = None, alt_mask: torch.Tensor | None = None, **kwargs) -> io.NodeOutput:
+    def execute(cls, *, alt_image:torch.Tensor | None = None, alt_mask:torch.Tensor | None = None, source:bool = True, **kwargs) -> io.NodeOutput:
+        if not source:
+            return io.NodeOutput(alt_image, alt_mask)
+
         samples: torch.Tensor | None = None
         mask: torch.Tensor | None = None
 
@@ -103,7 +107,7 @@ class PasteImage(io.ComfyNode):
                     np.array(image.convert(mode='RGBA').getchannel(channel='A')
                     ).astype(dtype=np.float32) / 255.0)[None,]
             else:
-                m: torch.Tensor = torch.zeros(size=(1, 64, 64)) # use a default empty mask
+                m: torch.Tensor = torch.zeros(size=(1, image.height, image.width)) # use a default empty mask
 
             try:
                 if samples is None:
