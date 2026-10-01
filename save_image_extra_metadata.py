@@ -68,7 +68,7 @@ class SaveImage_NoWorkflow(io.ComfyNode):
         if copy_to_clipboard:
             try:
                 from pyperclipimg import copy
-            except NotImplementedError as e:
+            except (NotImplementedError, ImportError) as e:
                 raise NotImplementedError("""
                       copy_to_clipboard is not available\n
                       Cannot import 'pyperclipimg' module, it might need some dependencies:\n

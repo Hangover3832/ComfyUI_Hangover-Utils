@@ -32,7 +32,7 @@ class HangoverUtils(ComfyExtension):
             from pyperclipimg import copy
             from .clipboard_copy import CopyImage
             result.append(CopyImage)
-        except NotImplementedError as e:
+        except (NotImplementedError, ImportError) as e:
             print("Save Image w/o Metadata: Error importing 'pyperclipimg' module. Copy to clipboard is not available.")
             print(e)
             

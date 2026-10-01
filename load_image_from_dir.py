@@ -89,7 +89,7 @@ class LoadImageIndexFromDir(io.ComfyNode):
                 if processing_interrupted():
                     raise ProcessingInterrupted
 
-                if  p.is_file and p.suffix.lower() in cls.valid_extensions:
+                if  p.is_file() and p.suffix.lower() in cls.valid_extensions:
                     results.append(p)
                     hash.update(str(p).encode('utf8'))
 

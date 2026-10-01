@@ -64,7 +64,10 @@ class SympyInterpreter(io.ComfyNode):
 
         expr_A = parse_expr(s=expression, local_dict=variables)
 
-        result_A = float(expr_A)
+        try:
+            result_A = float(expr_A)
+        except TypeError:
+            result_A = 0.0  # symbolic result, only str_A is meaningful
 
         return io.NodeOutput(
             math.floor(result_A),

@@ -35,7 +35,7 @@ class WildcardFileDict(dict[str, list[Path]]):
                 file_name = file_path.stem.lower()
 
                 # add the file to the list in the dict:
-                if file_name in self.keys():
+                if file_name in entries:
                     entries[file_name].append(file_path)
                 else:
                     entries[file_name] = [file_path]

@@ -42,7 +42,6 @@ class MakeInpaintModel(io.ComfyNode):
 
     @classmethod
     def execute(cls, *, model: ModelPatcher, sd1_5_pruned: str, sd1_5_inpaint: str, **kwargs) -> io.NodeOutput:
-
         '''
         add difference: result =  (sd1_5_inpaint - sd1_5_pruned) + model
         '''
@@ -63,7 +62,8 @@ class MakeInpaintModel(io.ComfyNode):
             for k in kp:
                 ip.add_patches(patches={k: kp[k]}, strength_patch=1.0, strength_model=1.0) # + model
             return io.NodeOutput(ip)
-        return io.NodeOutput(None)
+
+        raise ValueError(f"Cannot build inpaint model: '{sd1_5_inpaint}' or '{sd1_5_pruned}' could not be loaded.")
 
 
 def run_test() -> None:
