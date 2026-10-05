@@ -12,6 +12,7 @@ from sympy.parsing.sympy_parser import parse_expr
 from comfy_api.latest import io, ui
 
 
+
 class SympyInterpreter(io.ComfyNode):
     """Mathematical expression interpreter based on SymPy.
 
@@ -19,11 +20,50 @@ class SympyInterpreter(io.ComfyNode):
     Ports are automatically named a, b, c, … (lowercase letters).
     """
 
+    HELP = """
+- **Arithmetic operators**: `+`, `-`, `*`, `/`, `**` (power), `%` (modulo)  
+- **Relational operators**: `=`, `==`, `!=`, `<`, `>`, `<=`, `>=` (the `=` can be turned into `Eq` with the *convert_equals_signs* transformation)  
+- **Factorial notation**: `!` (e.g. `x!`)  
+
+**Built‑in constants**:
+
+| Constant | Symbol |
+|----------|--------|
+| pi | `pi` |
+| e | `E` |
+| infinity | `oo` |
+| Golden ratio | `golden_ratio` |
+| … (other built‑in constants) |  |
+
+**Built‑in functions**:
+
+- **Elementary functions**: `sin`, `cos`, `tan`, `csc`, `sec`, `cot`, `asin`, `acos`, `atan`, `acsc`, `asec`, `acot`, `sinh`, `cosh`, `tanh`, `asinh`, `acosh`, `atanh`
+- **Exponential & logarithmic**: `exp`, `log`, `ln`
+- **Roots & powers**: `sqrt`, `cbrt`, `root`
+- **Trigonometric inverses** (e.g. `asin`, `acos`, …) and hyperbolic inverses
+- **Special functions**: `gamma`, `loggamma`, `digamma`, `polygamma`, `erf`, `erfc`, `Ei`, `Si`, `Ci`, `zeta`
+- **Piecewise & conditional**: `Piecewise`, `Heaviside`, `sign`
+- **Absolute & rounding**: `Abs`, `sign`, `floor`, `ceiling`, `round`
+- **Factorial & gamma‑related**: `factorial`, `rf`, `binomial`
+- **Combinatorial**: `perm`, `nC`, `nPr`
+- **Complex‑number helpers**: `re`, `im`, `conjugate`
+- **Symbolic utilities**: `diff`, `integrate`, `limit`, `summation`, `product`, `Series`, `expand`, `simplify`
+- **Set operators**{}: `Union`, `Intersection`, `Complement`, `FiniteSet`, `Interval`, `ImageSet`
+- **Logical / relational** (if `allow_sets=True`): `And`, `Or`, `Not`, `Implies`, `Equivalent`
+
+"""
+
+
     @classmethod
     def define_schema(cls) -> io.Schema:
-        autogrow = io.Autogrow.TemplateNames(
-            input=io.MultiType.Input("value", [io.Float, io.Int]),
+        autogrow_aw = io.Autogrow.TemplateNames(
+            input=io.MultiType.Input("value", [io.Float, io.Int, io.Boolean]),
             names=list("abcdefghijklmnopqrstuvw"),  # a, b, c, d, … 
+            min=0,
+        )
+        autogrow_xyz = io.Autogrow.TemplateNames(
+            input=io.MultiType.Input("value", [io.Float, io.Int]),
+            names=list("xyz"),  # x, y, z 
             min=0,
         )
         return io.Schema(
@@ -36,31 +76,35 @@ class SympyInterpreter(io.ComfyNode):
                 "form", "calculate", "evaluate", "symbolic",
             ],
             inputs=[
-                io.String.Input(
-                    "expression",
-                    default="a",
-                    multiline=True,
-                ),
-                io.Autogrow.Input("values", template=autogrow),
-                io.MultiType.Input("x", [io.Float, io.Int], optional=True),
+                io.String.Input("expression", default="a", multiline=True,),
+                io.Autogrow.Input("values", template=autogrow_aw),
+                io.Autogrow.Input("xyz", template=autogrow_xyz),
             ],
             outputs=[
-                io.Int.Output(display_name="int_A"),
-                io.Float.Output(display_name="float_A"),
-                io.String.Output(display_name="str_A"),
+                io.Int.Output(display_name="int"),
+                io.Float.Output(display_name="float"),
+                io.String.Output(display_name="str"),
+                io.Boolean.Output(display_name="bool"),
+                io.String.Output(display_name="help"),
             ],
         )
 
+
     @classmethod
-    def execute(cls, *, expression: str, values: io.Autogrow.Type, x:io.Float | io.Int | None = None, **kwargs) -> io.NodeOutput:
+    def execute(cls, *, 
+                expression: io.String.Type, 
+                values: io.Autogrow.Type, 
+                xyz: io.Autogrow.Type, 
+                **kwargs) -> io.NodeOutput:
         """Evaluate the expression and return the results."""
-        if not expression.strip():
+
+        expression = expression.strip()
+        if not expression:
             raise ValueError("Expression cannot be empty.")
 
         # Gather dynamic ports as dict (a, b, c, …)
         variables: dict = dict(values)
-        if x is not None:
-            variables['x'] = x
+        variables.update(dict(xyz))
 
         print(f"Math_Interpreter: evaluating expression '{expression}'")
         print(f"  Variables: {variables}")
@@ -77,5 +121,7 @@ class SympyInterpreter(io.ComfyNode):
             math.floor(result_A),
             result_A,
             result_str,
+            result_str == "True",
+            cls.HELP,
             ui=ui.PreviewText(result_str),
         )
