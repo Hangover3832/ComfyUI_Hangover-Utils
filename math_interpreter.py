@@ -9,7 +9,7 @@ V3 node with io.Autogrow for dynamically growing numeric inputs (a, b, c, …).
 import math
 import string
 from sympy.parsing.sympy_parser import parse_expr
-from comfy_api.latest import io
+from comfy_api.latest import io, ui
 
 
 class SympyInterpreter(io.ComfyNode):
@@ -23,7 +23,7 @@ class SympyInterpreter(io.ComfyNode):
     def define_schema(cls) -> io.Schema:
         autogrow = io.Autogrow.TemplateNames(
             input=io.MultiType.Input("value", [io.Float, io.Int]),
-            names=list(string.ascii_lowercase),  # a, b, c, d, …
+            names=list("abcdefghijklmnopqrstuvw"),  # a, b, c, d, … 
             min=0,
         )
         return io.Schema(
@@ -42,6 +42,7 @@ class SympyInterpreter(io.ComfyNode):
                     multiline=True,
                 ),
                 io.Autogrow.Input("values", template=autogrow),
+                io.MultiType.Input("x", [io.Float, io.Int], optional=True),
             ],
             outputs=[
                 io.Int.Output(display_name="int_A"),
@@ -51,13 +52,15 @@ class SympyInterpreter(io.ComfyNode):
         )
 
     @classmethod
-    def execute(cls, *, expression: str, values: io.Autogrow.Type, **kwargs) -> io.NodeOutput:
+    def execute(cls, *, expression: str, values: io.Autogrow.Type, x:io.Float | io.Int | None = None, **kwargs) -> io.NodeOutput:
         """Evaluate the expression and return the results."""
         if not expression.strip():
             raise ValueError("Expression cannot be empty.")
 
         # Gather dynamic ports as dict (a, b, c, …)
         variables: dict = dict(values)
+        if x is not None:
+            variables['x'] = x
 
         print(f"Math_Interpreter: evaluating expression '{expression}'")
         print(f"  Variables: {variables}")
@@ -69,8 +72,10 @@ class SympyInterpreter(io.ComfyNode):
         except TypeError:
             result_A = 0.0  # symbolic result, only str_A is meaningful
 
+        result_str = str(expr_A)
         return io.NodeOutput(
             math.floor(result_A),
             result_A,
-            str(expr_A),
+            result_str,
+            ui=ui.PreviewText(result_str),
         )
