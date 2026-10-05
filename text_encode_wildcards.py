@@ -145,7 +145,7 @@ class TextEncodeWildcards(io.ComfyNode):
             description=(
                 "A very simple and basic {wildcard} style replacement text input box.\n"
                 "Ensure that wildcard files are stored in the 'comfyui/models/wildcards' folder\n"
-                "or any of its subfolder. The wildrard can also be a folder name, in which case\n"
+                "or any of its subfolder. The wildcard can also be a folder name, in which case\n"
                 "a random file will be choosen."
             ),
             inputs=[
