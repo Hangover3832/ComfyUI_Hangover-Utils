@@ -1,4 +1,4 @@
-# Sympy Help
+# SymPy Help
 
 ## Operators
 
@@ -14,7 +14,7 @@
 | pi | `pi` |
 | e | `E` |
 | infinity | `oo` |
-| Golden ratio | `golden_ratio` |
+| Golden ratio | `GoldenRatio` |
 
 
 ## Built‑in functions:

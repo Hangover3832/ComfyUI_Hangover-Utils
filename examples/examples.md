@@ -1,6 +1,5 @@
 ## Sympy Math Interpreter examples
 
-[example workflow](d__sympy.json)
 
 ### Numerical derivation
 

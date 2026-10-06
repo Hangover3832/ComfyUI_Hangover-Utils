@@ -37,7 +37,7 @@ class SympyInterpreter(io.ComfyNode):
 | pi | `pi` |
 | e | `E` |
 | infinity | `oo` |
-| Golden ratio | `golden_ratio` |
+| Golden ratio | `GoldenRatio` |
 
 
 ## Built‑in functions:
@@ -63,7 +63,7 @@ class SympyInterpreter(io.ComfyNode):
     def define_schema(cls) -> io.Schema:
         autogrow_aw = io.Autogrow.TemplateNames(
             input=io.MultiType.Input("value", [io.Float, io.Int, io.Boolean]),
-            names=list("abcdefghijklmnopqrstuvw"),  # a, b, c, d, … 
+            names=list(string.ascii_lowercase),  # a, b, c, d, … 
             min=0,
         )
         autogrow_xyz = io.Autogrow.TemplateNames(
@@ -81,9 +81,8 @@ class SympyInterpreter(io.ComfyNode):
                 "form", "calculate", "evaluate", "symbolic",
             ],
             inputs=[
-                io.String.Input("expression", default="a", multiline=True,),
                 io.Autogrow.Input("values", template=autogrow_aw),
-                io.Autogrow.Input("xyz", template=autogrow_xyz),
+                io.String.Input("expression", default="a", multiline=True),
             ],
             outputs=[
                 io.Int.Output(display_name="int"),
@@ -99,7 +98,6 @@ class SympyInterpreter(io.ComfyNode):
     def execute(cls, *, 
                 expression: io.String.Type, 
                 values: io.Autogrow.Type, 
-                xyz: io.Autogrow.Type, 
                 **kwargs) -> io.NodeOutput:
         """Evaluate the expression and return the results."""
 
@@ -108,8 +106,7 @@ class SympyInterpreter(io.ComfyNode):
             raise ValueError("Expression cannot be empty.")
 
         # Gather dynamic ports as dict (a, b, c, …)
-        variables: dict = dict(values)
-        variables.update(dict(xyz))
+        variables: dict[str, float] = dict(values)
 
         print(f"Math_Interpreter: evaluating expression '{expression}'")
         print(f"  Variables: {variables}")
@@ -119,7 +116,7 @@ class SympyInterpreter(io.ComfyNode):
         try:
             result_A = float(expr_A)
         except TypeError:
-            result_A = 0.0  # symbolic result, only str_A is meaningful
+            result_A = 0.0  # symbolic result, only result_str is meaningful
 
         result_str = str(expr_A)
         return io.NodeOutput(

@@ -34,19 +34,23 @@
 
 ![Sympy Math Interpreter](img/sympy.png)
 
-Based on [SymPy](https://www.sympy.org/en/index.html), this node brings powerful mathematical expression evaluation to ComfyUI. You can not only do + - * / pi E GoldenRatio but has also functions like round, min, max, sin, cos, exp, power, !, ... probably more than I am self aware of, and it can also do integration and differentiation. The node takes integer and float as input values.
+Based on [SymPy](https://www.sympy.org/en/index.html), this node brings powerful mathematical expression evaluation to ComfyUI. You can not only do + - * / pi E GoldenRatio but has also functions like round, min, max, sin, cos, exp, power, ! and it can also do integration and differentiation as well as complex number are possible. The node takes integer, float and boolean as input values. A boolean output makes complex boolean operations possible.
+
+See also [SymPy Help](sympy_help.md)
+
 
 #### Example expressions:
 
-6 input variables are available (a, b, c, d, e, f)
+Lots of input variables are available (a ~ z).
 
 * `round(a/b)`
 * `min(max(a,b),c)`
 * `diff(a*x**3+b*x**2+c,x)` (symbolic differentiation)
 * `diff(a*x**2+b*x+c,x).subs({x:d})` (differentiate, substitute and evaluate at point d)
 * `integrate(exp(-x**2),(x,a,b))` (numerical integration from a to b)
+* `(a and not b) ^ c` (boolean operation)
  
-See [Examples](examples/examples.md) [example workflow](examples/d__sympy.json)
+See [Examples](examples/examples.md)
 
 ---
 
@@ -54,7 +58,7 @@ See [Examples](examples/examples.md) [example workflow](examples/d__sympy.json)
 
 ![](img/save_image.png)
 
-With this custom save image node, you can preview or save, include or exclude the ComfyUI workflow metadata in the image. It is a derivation of ComfyUI's built-in save image node. Note that you can always right click on the image to save, it will also include the workflow if activated. IT can also copy the image to the clipboard if desired.
+With this custom save image node, you can preview or save, include or exclude the ComfyUI workflow metadata in the image. It is a derivation of ComfyUI's built-in save image node. Note that you can always right click on the image to save, it will also include the workflow if activated. It can also copy the image to the clipboard if desired.
 
 ---
 
