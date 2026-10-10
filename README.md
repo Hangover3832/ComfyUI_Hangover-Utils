@@ -15,6 +15,7 @@
 * Updated Save Image node: It now can also copy the image to the clipboard
 * New node: Extract workflow and node metadata 🆕
 * New node: Simple wildcard prompt parser 🆕
+* New node: Create sigmas from an arbitrary function.
 
 
 ## Nodes overview:
@@ -27,6 +28,7 @@
 - Image Clipboard Copy: Copy image to the clipboard (node might need some dependencies)
 - Get Workflow Data: Extract any field value from a node that is connected to the input.
 - Text Encode Wildcards: Very simple and basic {wildcard} parser and prompt clipboard paster.
+- Sigmas Function: Create scheduler sigmas from a built in or an arbitrary function.
 
 ---
 
@@ -98,6 +100,13 @@ Extract the workflow or any field name from a node that is connected to this inp
 ![alt text](img/wildcards.PNG)
 
 A very simple wildcards parser. Make sure you have wildcards text files placed in your comfyui/models/wildcards folder. The node can also paste a text prompt from the clipboard that will be used instead of the text input field.
+
+### Node: Sigmas Function
+Generate sigmas from an arbitrary function with one parameter.
+
+![alt text](img/sigmas_function.PNG)
+
+The generated sigmas can be connected to a custom ksampler.
 
 ## Installation
 

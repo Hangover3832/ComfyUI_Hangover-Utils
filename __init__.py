@@ -1,3 +1,5 @@
+from typing_extensions import override
+from comfy_api.latest import ComfyExtension, io
 from .save_image_extra_metadata import SaveImage_NoWorkflow
 from .image_scale_bounding_box import ImageScaleBoundingBox
 from .inpaint_model import MakeInpaintModel
@@ -7,8 +9,7 @@ from .get_workflow_data import GetWorkflowData
 from .math_interpreter import SympyInterpreter
 from .multi_string_concat import MultiStringConcat
 from .load_image_from_dir import LoadImageIndexFromDir
-from comfy_api.latest import ComfyExtension, io
-from typing_extensions import override
+from .sigmas_function import SigmasFunction
 
 WEB_DIRECTORY = "./web"
 
@@ -26,6 +27,7 @@ class HangoverUtils(ComfyExtension):
             GetWorkflowData,
             MultiStringConcat,
             LoadImageIndexFromDir,
+            SigmasFunction,
         ]
 
         try:
