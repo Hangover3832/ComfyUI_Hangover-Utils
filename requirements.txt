@@ -4,3 +4,4 @@ pillow
 pillow-avif-plugin
 pyperclipimg
 pyperclip
+matplotlib

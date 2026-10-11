@@ -9,7 +9,7 @@ from .get_workflow_data import GetWorkflowData
 from .math_interpreter import SympyInterpreter
 from .multi_string_concat import MultiStringConcat
 from .load_image_from_dir import LoadImageIndexFromDir
-from .sigmas_function import SigmasFunction
+from .sigmas_function import SigmasFunction, PlotSigmas
 
 WEB_DIRECTORY = "./web"
 
@@ -28,6 +28,7 @@ class HangoverUtils(ComfyExtension):
             MultiStringConcat,
             LoadImageIndexFromDir,
             SigmasFunction,
+            PlotSigmas,
         ]
 
         try:

@@ -1,8 +1,12 @@
 import torch
 import numpy as np
-from comfy_api.latest import io
+from comfy_api.latest import io, ui
 from comfy.comfy_types.node_typing import StrEnum
 from sympy.parsing.sympy_parser import parse_expr
+from matplotlib.figure import Figure
+from matplotlib.backends.backend_agg import FigureCanvasAgg
+
+PLOT_DPI = 100
 
 
 class FunctionType(StrEnum):
@@ -44,10 +48,10 @@ class SigmasFunction(io.ComfyNode):
 
 
     @classmethod
-    def execute(cls, *, 
-                function:FunctionType, 
-                steps:io.Int.Type, 
-                p:io.Float.Type, 
+    def execute(cls, *,
+                function:FunctionType,
+                steps:io.Int.Type,
+                p:io.Float.Type,
                 custom_function:io.String.Type,
                 x_from:io.Float.Type,
                 x_to:io.Float.Type,
@@ -72,11 +76,52 @@ class SigmasFunction(io.ComfyNode):
                 f = lambda x: cls._eval_expression(custom_function, x, p)
                 sigmas = linspace.apply_(f)
 
-        
+
         sigmas = torch.round(sigmas, decimals=5)
         return io.NodeOutput(sigmas, steps)
+
+
+class PlotSigmas(io.ComfyNode):
+    """ Plot the sigmas as a 1024x512 image. """
+    @classmethod
+    def define_schema(cls) -> io.Schema:
+        return io.Schema(
+            node_id="hangover_plot_sigmas",
+            display_name="Plot Sigmas",
+            description="Plot sigmas as a 1024x512 image",
+            category="Hangover",
+            search_aliases=["sigmas", "plot", "graph", "scheduler"],
+            inputs=[
+                io.Sigmas.Input("sigmas"),
+            ],
+            outputs=[
+                io.Image.Output(display_name="image"),
+            ],
+            is_output_node=True,
+        )
+
+    @classmethod
+    def execute(cls, *, sigmas:io.Sigmas.Type, **kwargs) -> io.NodeOutput:
+        values = sigmas.flatten().tolist()
+
+        fig = Figure(figsize=(1024 / PLOT_DPI, 512 / PLOT_DPI), dpi=PLOT_DPI)
+        ax = fig.add_subplot(111)
+        ax.plot(range(len(values)), values, marker="o")
+        ax.set_xlabel("step")
+        ax.set_ylabel("sigma")
+        ax.grid(True)
+
+        canvas = FigureCanvasAgg(fig)
+        canvas.draw()
+        w, h = canvas.get_width_height()
+        rgb = np.frombuffer(canvas.buffer_rgba(), dtype=np.uint8).reshape(h, w, 4)[:, :, :3]
+        image = torch.from_numpy(rgb.astype(np.float32) / 255.0)[None,]
+
+        return io.NodeOutput(image, ui=ui.PreviewImage(image))
 
 
 if __name__ == "__main__":
     result = SigmasFunction.execute(function=FunctionType.custom, steps=10, p=10.0, custom_function="p-x", x_from=0, x_to=1.0)
     print(result.args)
+    plot = PlotSigmas.execute(sigmas=result.args[0])
+    print(plot.args[0].shape, plot.args[0].dtype, plot.args[0].min().item(), plot.args[0].max().item())
