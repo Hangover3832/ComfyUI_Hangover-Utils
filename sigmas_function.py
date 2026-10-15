@@ -74,21 +74,21 @@ class SigmasFunction(io.ComfyNode):
                 **kwargs) -> io.NodeOutput:
 
         if function == FunctionType.exponential:
-            linspace = torch.linspace(1.0, 0.0, steps)
+            linspace = torch.linspace(1.0, 0.0, steps+1)
             sigmas = linspace ** p
 
         elif function == FunctionType.cosine:
-            linspace = torch.linspace(0, torch.pi/2.0, steps)
+            linspace = torch.linspace(0, torch.pi/2.0, steps+1)
             sigmas = torch.cos(linspace)
 
         elif function == FunctionType.gauss:
-            x = torch.linspace(0.0, p, steps)
+            x = torch.linspace(0.0, p, steps+1)
             gauss_p = cls.gauss(p)
             gauss_x = cls.gauss(x)
             sigmas = (gauss_x - gauss_p) / (1 - gauss_p) # normalize to constraints [0..1, 0..1]
 
         elif function == FunctionType.custom:
-            linspace = torch.linspace(x_from, x_to, steps)
+            linspace = torch.linspace(x_from, x_to, steps+1)
             cf = lambda x: cls._eval_expression(custom_function, x, p, scale)
             sigmas = linspace.apply_(cf)
 
@@ -103,7 +103,7 @@ class SigmasFunction(io.ComfyNode):
                     raise ValueError(f"Error: Input sigmas as a comma separated list of numbers (1.0, 0.3, ...): {e}")
 
             if function in [FunctionType.manual_interp, FunctionType.qwen21]:
-                linspace = torch.linspace(0.0, 1.0, steps=steps)
+                linspace = torch.linspace(0.0, 1.0, steps=steps+1)
                 x_values = torch.linspace(0.0, 1.0, len(sigmas))
                 y_values = sigmas
                 sigmas = torch.from_numpy(np.interp(x=linspace, xp=x_values, fp=y_values))
@@ -117,7 +117,7 @@ class SigmasFunction(io.ComfyNode):
                 raise ValueError(f"Points mut be at least two pairs of (x0,y0), (x1,y1), ..., {e}")
 
             x_values, y_values = zip(*pts)
-            linspace = torch.linspace(0.0, 1.0, steps)
+            linspace = torch.linspace(0.0, 1.0, steps+1)
 
             if function == FunctionType.polynom:
                 poly = Poly.fit(x_values, y_values, deg=n-1)
@@ -164,9 +164,9 @@ class PlotSigmas(io.ComfyNode):
 
         fig = Figure(figsize=(1024 / cls.PLOT_DPI, 512 / cls.PLOT_DPI), dpi=cls.PLOT_DPI)
         ax = fig.add_subplot(111)
-        ax.plot(range(1, len(values)+1), values, marker="o")
+        ax.plot(range(0, len(values)), values, marker="o")
         if values2 is not None:
-            ax.plot(range(1, len(values2)+1), values2, marker="x")
+            ax.plot(range(0, len(values2)), values2, marker="x")
         ax.set_xlabel("step")
         ax.set_ylabel("sigma")
         ax.grid(True)
