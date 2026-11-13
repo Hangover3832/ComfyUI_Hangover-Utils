@@ -7,12 +7,14 @@ from matplotlib.figure import Figure
 from matplotlib.backends.backend_agg import FigureCanvasAgg
 import ast
 from numpy.polynomial import Polynomial as Poly
+import math
 
 
 class FunctionType(StrEnum):
     exponential = "Exponential {x^p}"
-    cosine = "Cosine {cos(x), x from 0 to pi/2 }"
+    cosine = "Cosine {cos(x), x from 0 to pi/2}"
     gauss = "Gauss {e^-x^2 from 0 to p}"
+    sigmoid = "Sigmoid {1-(1/(1+exp(-x))), from -p to p}"
     polynom = "Polynomial regression {least squares fit(points)}"
     polygon = "Linear interpolation {points}"
     custom = "Custom function (use x, p and s)"
@@ -38,12 +40,12 @@ class SigmasFunction(io.ComfyNode):
             inputs=[
                 io.Combo.Input("function", options=FunctionType),
                 io.Int.Input("steps", default=8, min=2),
-                io.Float.Input("p", default=0.5, step=0.001, tooltip="parameter p"),
-                io.Float.Input("scale", default=1.0, step=0.001, tooltip="scale factor (after clipping)"),
+                io.Float.Input("p", default=0.5, step=0.001, min=-1e9, max=1e9, tooltip="parameter p"),
+                io.Float.Input("scale", default=1.0, step=0.001, min=-1e9, max=1e9, tooltip="scale factor (after clipping)"),
                 io.String.Input("points", default="(0.0,1.0), (0.5,0.25), (1.0,0.0)", tooltip="points in pairs (x0, y0), (x1, y1), ..., where x should range from 0.0 to 1.0, parameter p is availabe",),
                 io.String.Input("custom_function", default="1-(x**p)", tooltip="parameters x, p and s (scale) are abvailabe"),
-                io.Float.Input("x_from", default=0.0, step=0.001),
-                io.Float.Input("x_to", default=1.0, step=0.001),
+                io.Float.Input("x_from", default=0.0, step=0.001, min=-1e9, max=1e9),
+                io.Float.Input("x_to", default=1.0, step=0.001, min=-1e9, max=1e9),
                 io.Boolean.Input("clip", default=True, tooltip="clip the output between [0..1]")
             ],
             outputs=[
@@ -56,9 +58,14 @@ class SigmasFunction(io.ComfyNode):
         return float(parse_expr(expression, local_dict={'x': x, 'p': p, 's': s}))
 
     @staticmethod
-    def gauss(x:float | torch.Tensor) -> torch.Tensor:
-        'g(x) = e^(-(x^2))'
+    def _gauss(x:float | torch.Tensor) -> torch.Tensor:
+        '''g(x) = e^(-(x^2))'''
         return torch.exp(-torch.square(torch.as_tensor(x)))
+    
+    @staticmethod
+    def _sigmoid(x:float | torch.Tensor) -> torch.Tensor:
+        '''1-(1/(1+exp(-x)))'''
+        return 1-(1/(1+torch.exp(torch.as_tensor(-x))))
 
     @classmethod
     def execute(cls, *,
@@ -83,9 +90,16 @@ class SigmasFunction(io.ComfyNode):
 
         elif function == FunctionType.gauss:
             x = torch.linspace(0.0, p, steps+1)
-            gauss_p = cls.gauss(p)
-            gauss_x = cls.gauss(x)
+            gauss_p = cls._gauss(p)
+            gauss_x = cls._gauss(x)
             sigmas = (gauss_x - gauss_p) / (1 - gauss_p) # normalize to constraints [0..1, 0..1]
+
+        elif function == FunctionType.sigmoid:
+            linspace = torch.linspace(-p, p, steps+1)
+            s_from = cls._sigmoid(-p)
+            s_to = cls._sigmoid(p)
+            sigmas = linspace.apply_(cls._sigmoid)
+            sigmas = (sigmas - s_to) / (s_from - s_to) # normalize to [0..1]
 
         elif function == FunctionType.custom:
             linspace = torch.linspace(x_from, x_to, steps+1)
@@ -103,7 +117,7 @@ class SigmasFunction(io.ComfyNode):
                     raise ValueError(f"Error: Input sigmas as a comma separated list of numbers (1.0, 0.3, ...): {e}")
 
             if function in [FunctionType.manual_interp, FunctionType.qwen21]:
-                linspace = torch.linspace(0.0, 1.0, steps=steps+1)
+                linspace = torch.linspace(0.0, 1.0, steps+1)
                 x_values = torch.linspace(0.0, 1.0, len(sigmas))
                 y_values = sigmas
                 sigmas = torch.from_numpy(np.interp(x=linspace, xp=x_values, fp=y_values))
